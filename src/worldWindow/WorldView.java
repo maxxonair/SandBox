@@ -72,6 +72,7 @@ public class WorldView {
     private PerspectiveCamera camera;
 
 	private   String modelObjectPath;
+	
 	 Vector3 rotState = new Vector3(0,0,0);
 	 
 	 private Quaternion quatTemp = new Quaternion(1,0,0,0);
@@ -81,7 +82,7 @@ public class WorldView {
 	}
 	
 	public WorldView(String objectFilePath) {
-		this.modelObjectPath = modelObjectPath;
+		this.modelObjectPath = objectFilePath; 
 	}
 	
 	public void updateFrameSize(double framex, double framey) {
@@ -93,8 +94,8 @@ public class WorldView {
 	}
 
 
-	public Scene start() {
-		 this.modelObjectPath=objectFilePath;
+	public Group start() {
+
 		 model =  loadModel(modelObjectPath);
 		
 		Group root = new Group();
@@ -137,7 +138,7 @@ public class WorldView {
 		initMouseControl(scene, camera);
 
 	
-		return scene;
+		return root;
 		
 
 	}
@@ -279,13 +280,19 @@ private   SmartGroup loadModel(String fileString) {
     material.setDiffuseColor(Color.SILVER);
     ObjModelImporter importer = new ObjModelImporter();
    // importer.read(url);
+   // try {
+    System.out.println(fileString);
     importer.read(fileString);
 
     for (MeshView view : importer.getImport()) {
         modelRoot.getChildren().add(view);
         view.setMaterial(material);
     }
-
+    /*
+    } catch (Exception exp) {
+    	System.out.println("Error: Loading 3D Model failed.");
+    }
+*/
 modelRoot.setScaleX(modelScale);
 modelRoot.setScaleY(modelScale);
 modelRoot.setScaleZ(modelScale);

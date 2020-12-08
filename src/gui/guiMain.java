@@ -6,16 +6,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import worldWindow.WorldView;
-import worldWindow.worldView;
 
-public class guiMain extends Application {
+public class GuiMain extends Application {
 
 	private static Stage window;
 	private String windowTitle = "SandBox Environment Mark1";
 	
 	private String objectFilePath = "";
 	
-	  public static void guiMain(String[] args) {
+	  public static void GuiMain(String[] args) {
 			// Start GUI
 		    launch(args);
 		  }
@@ -28,18 +27,20 @@ public class guiMain extends Application {
 				window.close();
 			});
 			
-			WorldView worldView = new WorldView(objectFilePath);
+			
+			System.out.println(FilePaths.Model3DFilePath);
+			WorldView worldView = new WorldView(FilePaths.Model3DFilePath);
 			
 			// Set layout
 			
 		    VBox centerLayout = new VBox(2);
 		    // Add 3D window
-		    centerLayout.getChildren().add(worldView.start(objectFilePath));
+		    centerLayout.getChildren().add(worldView.start());
 		    // Add lower bar 
 			
 		    HBox horizontalLayout = new HBox(2);
 		    // Add Sidebar
-		    // Add centerlayout
+		    horizontalLayout.getChildren().add(centerLayout);
 		    
 		    
 		    VBox verticalLayout = new VBox(2);
