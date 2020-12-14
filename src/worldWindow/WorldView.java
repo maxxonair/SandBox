@@ -2,9 +2,12 @@ package worldWindow;
 
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 
+import gui.Colors;
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.embed.swing.JFXPanel;
+import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Camera;
@@ -13,17 +16,21 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import utils.Formats;
 import utils.Quaternion;
-import utils.Vector3;
+import utils.Vec3;
 import utils.Vector4;
 
 /**
@@ -35,113 +42,254 @@ import utils.Vector4;
 		
 		• Z-axis pointing away from the viewer or into the screen.
  */
-public class WorldView {
-	
-	private boolean isZoom = false;
-	
-	double holdValx=0;
-	double holdValy=0;
-	
-	 double frameX=610;
-	 double frameY=550;
-	
-	 double ref1 = ( - frameX/1.24);
-	 double ref2 = ( - frameY/2);
+public class WorldView extends Application{
+//---------------------------------------------------------------------------
+// Scene control 
+//---------------------------------------------------------------------------
+double holdValx=0;
+double holdValy=0;
 
-	private   double anchorAngleCameraY=0;
-	private   double anchorAngleCameraX=0;
-	private   final DoubleProperty angleCameraY = new SimpleDoubleProperty(0);	
-	private   final DoubleProperty angleCameraX = new SimpleDoubleProperty(0);
-	
-	private   double mouseWheelZoomSensitivity = 0.5;
-	private   double mouseSensitivity =0.05;
-	
-	private   double cameraToTargetDistance = 0;
-	private String objectFilePath;
-	public   SmartGroup model;
-	//public   SmartGroup coordinateSystem;
-	
-    @SuppressWarnings("unused")
-	private Translate translate;
-    private Rotate rotateX,rotateY;
-	
-    double gridScale=5;
-    double modelScale=3;
-    
-    JFXPanel fxPanel;
-    private PerspectiveCamera camera;
+private double sceneHeight;
+private double sceneWidth;
 
-	private   String modelObjectPath;
-	
-	 Vector3 rotState = new Vector3(0,0,0);
-	 
-	 private Quaternion quatTemp = new Quaternion(1,0,0,0);
-	
-	public void setModelObjectPath(String modelObjectPath) {
-		this.modelObjectPath = modelObjectPath;
-	}
-	
-	public WorldView(String objectFilePath) {
-		this.modelObjectPath = objectFilePath; 
-	}
-	
-	public void updateFrameSize(double framex, double framey) {
-		this.frameX = framex;
-		this.frameY = framey;
-		this.ref1 = ( - frameX/3);
-		this.ref2 = ( - frameY/2);
+private Scene parentScene;
+private SubScene scene;
 
-	}
+private AnchorPane anchorPane;
 
+//---------------------------------------------------------------------------
+// Environment settings 
+//---------------------------------------------------------------------------
+private float GRID_SIZE = 8000;
+//---------------------------------------------------------------------------
+// Mouse control  
+//---------------------------------------------------------------------------
+//private   double mouseWheelZoomSensitivity = 0.5;
+private   double mouseSensitivity =0.05;
+//---------------------------------------------------------------------------
+// Camera settings 
+//---------------------------------------------------------------------------
+private PerspectiveCamera camera;
 
-	public Group start() {
+private   double anchorAngleCameraY=0;
+private   double anchorAngleCameraX=0;
 
-		 model =  loadModel(modelObjectPath);
+private   final DoubleProperty angleCameraY = new SimpleDoubleProperty(0);	
+private   final DoubleProperty angleCameraX = new SimpleDoubleProperty(0);
+private double cameraToTargetDistance = 0;
+
+// Camera movement (Keyboard control)
+private boolean running, goNorth, goSouth, goEast, goWest;
+
+//private boolean isZoom = false;
+
+private double CAMERA_FOV = 40;
+//---------------------------------------------------------------------------
+// Model control 
+//---------------------------------------------------------------------------
+private SmartGroup model;
+private String modelObjectPath;
+private double modelScale=3;
+
+//private Vector3 rotState = new Vector3(0,0,0);
+ 
+private Quaternion quatTemp = new Quaternion(1,0,0,0);
+
+@SuppressWarnings("unused")
+private Translate translate;
+private Rotate rotateX,rotateY;
+//---------------------------------------------------------------------------
+//  Head-up Display controls 
+//---------------------------------------------------------------------------
+private Label HUD_cameraPosition;
+private Label HUD_modelPosition;
+//---------------------------------------------------------------------------
+// 
+//---------------------------------------------------------------------------
+	@Override
+	public void start(Stage stage) throws Exception{
+		//---------------------------------------------------------------------------
+		// Model 
+		//---------------------------------------------------------------------------
+		try {
+			model =  loadModel(modelObjectPath);
+		} catch (Exception e) {
+			model = new SmartGroup();
+		}
+		// Set init model position
+		model.setTranslateX(200);
+		model.setTranslateY(0);
+		model.setTranslateZ(-300);
 		
-		Group root = new Group();
+	    Group root = new Group();
 		root.getChildren().add(model);
-		//root.getChildren().add(coordinateSystem);
 		
+		anchorPane = new AnchorPane();
+		//---------------------------------------------------------------------------
+		// Camera
+		//---------------------------------------------------------------------------
 	    camera = new PerspectiveCamera();
 		camera.setNearClip(.001);
 		camera.setFarClip(100);	
+		camera.setFieldOfView(CAMERA_FOV);
 		
 		SmartGroup cameraGroup = new SmartGroup();
 		cameraGroup.getChildren().add(camera);
 
 		camera.getTransforms().addAll(
                 rotateY = new Rotate(0, Rotate.Y_AXIS),
-                rotateX = new Rotate(0, Rotate.X_AXIS),
-                //rotateZ = new Rotate(0, Rotate.Z_AXIS),
-                translate = new Translate(ref1, ref2, -cameraToTargetDistance)
+                rotateX = new Rotate(-35, Rotate.X_AXIS)
         );
 		
-		//final Group axes = getAxes(2.5);
-		final Group grid = createGrid(2000, 100);
+		camera.setTranslateX(0);
+		camera.setTranslateY(-300);
+		camera.setTranslateZ(-1000);
+		//---------------------------------------------------------------------------
+		// Environment
+		//---------------------------------------------------------------------------
+		final Group grid = Grid.createGrid(GRID_SIZE, 100);
 		
 		Group environment = new Group();
-		//environment.getChildren().add(axes);
 		environment.getChildren().add(grid);
 		
-		environment.translateXProperty().set(0);
-		environment.translateYProperty().set(0);
-		environment.translateZProperty().set(0);
+		double translateGrid = 0;
+		environment.setTranslateX(-translateGrid);
+		
 		
 		root.getChildren().add(environment);
 		root.getChildren().add(camera);
 		
-		Scene scene = new Scene(root, 450, 450, true, SceneAntialiasing.BALANCED);
-		scene.setFill(Color.color(0.15,0.15,0.15));
+		//---------------------------------------------------------------------------
+		// Scene
+		//---------------------------------------------------------------------------
+		sceneHeight = 700;
+		sceneWidth = 1300;
+	    scene = new SubScene(root, sceneHeight, sceneWidth, true, SceneAntialiasing.BALANCED);
+		scene.setFill(Colors.backGroundColor);
 		scene.setCamera(camera);		
 		
-
-		initMouseControl(scene, camera);
-
-	
-		return root;
+		//---------------------------------------------------------------------------
+		// Mouse and Keyboard Control
+		//---------------------------------------------------------------------------
+		//initMouseControl(scene, camera);
 		
+		parentScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                switch (event.getCode()) {
+                    case UP:    goNorth = true; break;
+                    case DOWN:  goSouth = true; break;
+                    case LEFT:  goWest  = true; break;
+                    case RIGHT: goEast  = true; break;
+                    case SHIFT: running = true; break;
+				default:
+					break;
+                }
+            }
+        });
 
+		parentScene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                switch (event.getCode()) {
+                    case UP:    goNorth = false; break;
+                    case DOWN:  goSouth = false; break;
+                    case LEFT:  goWest  = false; break;
+                    case RIGHT: goEast  = false; break;
+                    case SHIFT: running = false; break;
+				default:
+					break;
+                }
+            }
+        });
+        
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                int dx = 0, dy = 0, dz = 0;
+                int pace = 25;
+                if (goNorth) dy -= pace;
+                if (goSouth) dy += pace;
+                if (goEast)  dx += pace;
+                if (goWest)  dx -= pace;
+                if (running) { dz = -dy ; dy = 0 ; }
+
+                moveCameraBy(dx, dy, dz);
+            }
+        };
+        timer.start();
+        
+       anchorPane.getChildren().add(scene);
+       
+       //---------------------------------------------------------------------------
+       // Head-on Display
+       //---------------------------------------------------------------------------
+	    HUD_cameraPosition = new Label("Camera position [x y z]: ["+camera.getLayoutX()+"  "+camera.getLayoutY()+"  "+camera.getTranslateX()+"]");
+	    HUD_cameraPosition.setLayoutY(0);
+	    HUD_modelPosition = new Label("Model position [x y z]: ["+model.getTranslateY()+"  "+model.getTranslateY()+"  "+model.getTranslateY()+"]");
+	    HUD_modelPosition.setLayoutY(20);
+	    
+	    Group HUD_Elements = new Group();
+	    HUD_Elements.getChildren().add(HUD_cameraPosition);
+	    HUD_Elements.getChildren().add(HUD_modelPosition);
+        
+		anchorPane.getChildren().add(HUD_Elements);
+		
+       //---------------------------------------------------------------------------
+       // Final setup
+       //---------------------------------------------------------------------------
+	   moveCameraTo(-250, -500, -250);
+        
 	}
+	
+	
+    private void moveCameraBy(int dx, int dy) {
+       // if (dx == 0 && dy == 0) return;
+
+        final double cx = camera.getBoundsInLocal().getWidth()  / 2;
+        final double cy = camera.getBoundsInLocal().getHeight() / 2;
+
+        double x = cx + camera.getLayoutX() + dx;
+        double y = cy + camera.getLayoutY() + dy;
+
+        moveCameraTo(x, y);
+    }
+    
+    private void moveCameraBy(int dx, int dy, int dz) {
+        // if (dx == 0 && dy == 0) return;
+
+         final double cx = camera.getBoundsInLocal().getWidth()  / 2;
+         final double cy = camera.getBoundsInLocal().getHeight() / 2;
+
+         double x =  camera.getTranslateX() + dx;
+         double y =  camera.getTranslateY() + dy;
+         double z =  camera.getTranslateZ() + dz;
+
+         moveCameraTo(x, y, z);
+     }
+    
+    public void moveCameraTo(double x, double y) {
+        final double cx = camera.getBoundsInLocal().getWidth()  / 2;
+        final double cy = camera.getBoundsInLocal().getHeight() / 2;
+
+        camera.relocate(x - cx, y - cy);
+        updateHUD();
+    }
+    
+    public void moveCameraTo(double x, double y, double z) {
+        camera.setTranslateX(x);
+        camera.setTranslateY(y);
+        camera.setTranslateZ(z);
+        updateHUD();
+    }
+    
+    public void moveModelTo(double x, double y, double z) {
+        model.setTranslateX(x);
+        model.setTranslateY(y);
+        model.setTranslateZ(z);
+        updateHUD();
+    }
+	
 	public void modelRotation(Quaternion q) {
 			Quaternion qInverse=new Quaternion();
 			try {
@@ -197,7 +345,7 @@ public class WorldView {
         return result;
     }	
 	
-	private   void initMouseControl(Scene scene, Camera camera) {
+	private   void initMouseControl(SubScene scene, Camera camera) {
 		
 		/**
 		 * 
@@ -273,6 +421,11 @@ public class WorldView {
 	public   void setCameraRotationX(SmartGroup camera, double angleX) {
 		camera.rotateByX(angleX);
 	}
+	
+
+public SubScene getScene() {
+		return scene;
+	}
 
 private   SmartGroup loadModel(String fileString) {
     SmartGroup modelRoot = new SmartGroup();
@@ -281,7 +434,6 @@ private   SmartGroup loadModel(String fileString) {
     ObjModelImporter importer = new ObjModelImporter();
    // importer.read(url);
    // try {
-    System.out.println(fileString);
     importer.read(fileString);
 
     for (MeshView view : importer.getImport()) {
@@ -300,195 +452,6 @@ modelRoot.setScaleZ(modelScale);
 }
 
 
-public   class SmartGroup extends Group {
-	Rotate r;
-	Transform t = new Rotate();
-	
-	void rotBack() {
-		r = new Rotate(-rotState.z, Rotate.Z_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(-rotState.y, Rotate.Y_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(-rotState.x, Rotate.X_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-	}
-	void rotateByX(double angle) {
-		rotBack();
-		r = new Rotate(angle, Rotate.X_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(rotState.y, Rotate.Y_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(rotState.z, Rotate.Z_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		rotState.x = angle;
-	}
-	
-	void rotateByY(double angle) {
-		rotBack();
-		r = new Rotate(rotState.x, Rotate.X_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(angle, Rotate.Y_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(rotState.z, Rotate.Z_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		
-		rotState.y = angle;
-	}
-	void rotateByZ(double angle) {
-		rotBack();
-		r = new Rotate(rotState.x, Rotate.X_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(rotState.y, Rotate.Y_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		r = new Rotate(angle, Rotate.Z_AXIS);
-		t = t.createConcatenation(r);
-		this.getTransforms().clear();
-		this.getTransforms().addAll(t);
-		rotState.z = angle;
-	}
-}
-
-public static   Group createGrid(float size, float delta) {
-    if (delta < 1) {
-        delta = 1;
-    }
-    final PolygonMesh plane = createQuadrilateralMesh(size, size, (int) (size / delta), (int) (size / delta));
-
-    final PolygonMesh plane2 = createQuadrilateralMesh(size, size, (int) (size / delta / 5), (int) (size / delta / 5));
-
-    PolygonMeshView meshViewXY = new PolygonMeshView(plane);
-    meshViewXY.setDrawMode(DrawMode.LINE);
-    meshViewXY.setCullFace(CullFace.NONE);
-
-    PolygonMeshView meshViewXZ = new PolygonMeshView(plane);
-    meshViewXZ.setDrawMode(DrawMode.LINE);
-    meshViewXZ.setCullFace(CullFace.NONE);
-    meshViewXZ.getTransforms().add(new Rotate(90, Rotate.X_AXIS));
-    
-	PhongMaterial material = new PhongMaterial();
-    material.setDiffuseColor(Color.BLACK);
-    meshViewXZ.setMaterial(material);
-
-    PolygonMeshView meshViewYZ = new PolygonMeshView(plane);
-    meshViewYZ.setDrawMode(DrawMode.LINE);
-    meshViewYZ.setCullFace(CullFace.NONE);
-    meshViewYZ.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
-
-    PolygonMeshView meshViewXY2 = new PolygonMeshView(plane2);
-    meshViewXY2.setDrawMode(DrawMode.LINE);
-    meshViewXY2.setCullFace(CullFace.NONE);
-    meshViewXY2.getTransforms().add(new Translate(size / 1000f, size / 1000f, 0));
-
-    PolygonMeshView meshViewXZ2 = new PolygonMeshView(plane2);
-    meshViewXZ2.setDrawMode(DrawMode.LINE);
-    meshViewXZ2.setCullFace(CullFace.NONE);
-    meshViewXZ2.getTransforms().add(new Translate(size / 1000f, size / 1000f, 0));
-    meshViewXZ2.getTransforms().add(new Rotate(90, Rotate.X_AXIS));
-    meshViewXZ2.setMaterial(material);
-
-    PolygonMeshView meshViewYZ2 = new PolygonMeshView(plane2);
-    meshViewYZ2.setDrawMode(DrawMode.LINE);
-    meshViewYZ2.setCullFace(CullFace.NONE);
-    meshViewYZ2.getTransforms().add(new Translate(size / 1000f, size / 1000f, 0));
-    meshViewYZ2.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
-
-   // return new Group(meshViewXY, meshViewXY2, meshViewXZ, meshViewXZ2 /*, meshViewYZ, meshViewYZ2 */);
-    return new Group( meshViewXZ/*, meshViewXZ2 , meshViewYZ, meshViewYZ2 */);
-}
-
-private static   PolygonMesh createQuadrilateralMesh(float width, float height, int subDivX, int subDivY) {
-    final float minX = - width / 2f;
-    final float minY = - height / 2f;
-    final float maxX =   width / 2f;
-    final float maxY =   height / 2f;
-
-    final int pointSize = 3;
-    final int texCoordSize = 2;
-    // 4 point indices and 4 texCoord indices per face
-    final int faceSize = 8;
-    int numDivX = subDivX + 1;
-    int numVerts = (subDivY + 1) * numDivX;
-    float points[] = new float[numVerts * pointSize];
-    float texCoords[] = new float[numVerts * texCoordSize];
-    int faceCount = subDivX * subDivY;
-    int faces[][] = new int[faceCount][faceSize];
-
-    // Create points and texCoords
-    for (int y = 0; y <= subDivY; y++) {
-        float dy = (float) y / subDivY;
-        double fy = (1 - dy) * minY + dy * maxY;
-
-        for (int x = 0; x <= subDivX; x++) {
-            float dx = (float) x / subDivX;
-            double fx = (1 - dx) * minX + dx * maxX;
-
-            int index = y * numDivX * pointSize + (x * pointSize);
-            points[index] = (float) fx;
-            points[index + 1] = (float) fy;
-            points[index + 2] = 0.0f;
-
-            index = y * numDivX * texCoordSize + (x * texCoordSize);
-            texCoords[index] = dx;
-            texCoords[index + 1] = dy;
-        }
-    }
-    
-    
-
-    // Create faces
-    int index = 0;
-    for (int y = 0; y < subDivY; y++) {
-        for (int x = 0; x < subDivX; x++) {
-            int p00 = y * numDivX + x;
-            int p01 = p00 + 1;
-            int p10 = p00 + numDivX;
-            int p11 = p10 + 1;
-            int tc00 = y * numDivX + x;
-            int tc01 = tc00 + 1;
-            int tc10 = tc00 + numDivX;
-            int tc11 = tc10 + 1;
-
-            faces[index][0] = p00;
-            faces[index][1] = tc00;
-            faces[index][2] = p10;
-            faces[index][3] = tc10;
-            faces[index][4] = p11;
-            faces[index][5] = tc11;
-            faces[index][6] = p01;
-            faces[index++][7] = tc01;
-        }
-    }
-
-    int[] smooth = new int[faceCount];
-
-    PolygonMesh mesh = new PolygonMesh(points, texCoords, faces);
-    mesh.getFaceSmoothingGroups().addAll(smooth);
-    return mesh;
-}
-
-
 @SuppressWarnings("unused")
 private   Node prepareAmbientLight(){
 	
@@ -498,11 +461,65 @@ private   Node prepareAmbientLight(){
 	return ambientLight;
 }
 
+public void setModelObjectPath(String modelObjectPath) {
+	this.modelObjectPath = modelObjectPath;
+}
 
-	public void start(Stage arg0) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-	
+public WorldView(String objectFilePath, Scene scene) {
+	this.modelObjectPath = objectFilePath; 
+	this.parentScene = scene;
+}
 
+public double getSceneHeight() {
+	return sceneHeight;
+}
+
+public void setSceneHeight(double sceneHeight) {
+	this.sceneHeight = sceneHeight;
+    scene.setHeight(sceneHeight);
+    //moveCameraTo(0,0);
+}
+
+public double getSceneWidth() {
+	return sceneWidth;
+}
+
+public AnchorPane getAnchorPane() {
+	return anchorPane;
+}
+
+
+public void setSceneWidth(double sceneWidth) {
+	this.sceneWidth = sceneWidth;
+    scene.setWidth(sceneWidth);
+    //moveCameraTo(0,0);
+}
+/*
+public static void main(String[] args) {launch(args);}
+*/	
+
+public Vec3 getCameraPosition() {
+	Vec3 cameraPosition = new Vec3();
+	cameraPosition.x = camera.getTranslateX();
+	cameraPosition.y = camera.getTranslateY();
+	cameraPosition.z = camera.getTranslateZ();
+	return cameraPosition;
+}
+
+public Vec3 getModelPosition() {
+	Vec3 modelPosition = new Vec3();
+	modelPosition.x = model.getTranslateX();
+	modelPosition.y = model.getTranslateY();
+	modelPosition.z = model.getTranslateZ();
+	return modelPosition;
+}
+
+private void updateHUD() {
+	HUD_cameraPosition.setText("Camera position [x y z ]: ["+Formats.decform01.format(camera.getTranslateX())+
+			"  "+Formats.decform01.format(camera.getTranslateY())+
+			"  "+Formats.decform01.format(camera.getTranslateZ())+"]");
+	HUD_modelPosition.setText("Model position [x y z ]: ["+Formats.decform01.format(model.getTranslateX())+"  "+
+			Formats.decform01.format(model.getTranslateY())+"  "+
+			Formats.decform01.format(model.getTranslateZ())+"]");
+}
 }

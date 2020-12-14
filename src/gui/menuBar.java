@@ -10,8 +10,14 @@ public class menuBar {
 	    MenuBar menuBar = new MenuBar(); 
 	    
 	    Menu menu = new Menu("Menu"); 
+	    Menu file = new Menu("File"); 
+	    Menu settings = new Menu("Settings"); 
+	    Menu project = new Menu("Project"); 
 	    // add menu to menubar 
 	    menuBar.getMenus().add(menu); 
+	    menuBar.getMenus().add(file); 
+	    menuBar.getMenus().add(settings); 
+	    menuBar.getMenus().add(project); 
 	    
 	    return menuBar;
 	}

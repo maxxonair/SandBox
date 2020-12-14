@@ -1,0 +1,18 @@
+.root{
+    -fx-background-color: #383838;
+}
+.menu-bar{
+	-fx-background-color: #282828 ;
+}
+.menu .label{
+    -fx-text-fill: #e8e8e8;
+}
+.pane {
+	-fx-background-color: #e8e8e8 ;
+}
+.label{
+	-fx-text-fill: #e8e8e8;
+}
+.split-pane {
+	-fx-background-color: #383838;
+}
