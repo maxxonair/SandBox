@@ -103,6 +103,7 @@ private Rotate rotateX,rotateY;
 //---------------------------------------------------------------------------
 private Label HUD_cameraPosition;
 private Label HUD_modelPosition;
+private Label HUD_animationTime;
 //---------------------------------------------------------------------------
 // 
 //---------------------------------------------------------------------------
@@ -228,10 +229,13 @@ private Label HUD_modelPosition;
 	    HUD_cameraPosition.setLayoutY(0);
 	    HUD_modelPosition = new Label("Model position [x y z]: ["+model.getTranslateY()+"  "+model.getTranslateY()+"  "+model.getTranslateY()+"]");
 	    HUD_modelPosition.setLayoutY(20);
+	    HUD_animationTime = new Label("Time [s]: 0");
+	    HUD_animationTime.setLayoutY(40);
 	    
 	    Group HUD_Elements = new Group();
 	    HUD_Elements.getChildren().add(HUD_cameraPosition);
 	    HUD_Elements.getChildren().add(HUD_modelPosition);
+	    HUD_Elements.getChildren().add(HUD_animationTime);
         
 		anchorPane.getChildren().add(HUD_Elements);
 		
@@ -521,5 +525,9 @@ private void updateHUD() {
 	HUD_modelPosition.setText("Model position [x y z ]: ["+Formats.decform01.format(model.getTranslateX())+"  "+
 			Formats.decform01.format(model.getTranslateY())+"  "+
 			Formats.decform01.format(model.getTranslateZ())+"]");
+}
+
+public void setAnimationTime(double time) {
+	HUD_animationTime.setText("Time [s]: "+Formats.decform01.format(time));
 }
 }

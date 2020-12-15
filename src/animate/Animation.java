@@ -5,12 +5,15 @@ import java.util.List;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.Timeline;
+import utils.Interpolator;
 import utils.Vec3;
 import worldWindow.WorldView;
 
 public class Animation {
 
 	private AnimationFile animationFile; 
+	private int animationFrame;
+	private Interpolator interpolate = new Interpolator();
 	
 	private WorldView worldView;
 	
@@ -22,6 +25,10 @@ public class Animation {
 	private boolean animation_pause;
 	
 	private Integer frame;
+	private long startTime;
+	private boolean timeFlag=false;
+	
+	private double animationTime;
 	
 	
 	public Animation(WorldView worldView) {
@@ -29,6 +36,8 @@ public class Animation {
 		animation_stop = true;
 		animation_running=false;
 		animation_pause=false;
+		animationFrame = 1;
+		animationTime=0;
 		
         timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -37,7 +46,17 @@ public class Animation {
         animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
+            	animationTime = 0;
+            	if ( !timeFlag ) {
+            		startTime = now;
+            		timeFlag =true;
+            	} else {
+            		animationTime = (now - startTime)*0.000000001;
+            	}
+            	Vec3 position = findFrameData(animationTime, animationFile, animationFrame, true);
             	
+            	worldView.moveModelTo(position.x, position.y, position.z);
+            	worldView.setAnimationTime(animationTime);
             }
         };
 	}
@@ -54,6 +73,8 @@ public class Animation {
 		animation_stop = true;
 		animation_running=false;
 		animation_pause=false;
+		timeFlag = false;
+		animationFrame = 1;
 	}
 	
 	public void pause() {
@@ -84,14 +105,88 @@ public class Animation {
 		// Test Animation File for functional testing 
 		AnimationFile testAnimationFile = new AnimationFile("TestAnimation");
 		List<SequenceSet> sequenceList = new ArrayList<SequenceSet>();
-		double fac =2;
-		for(int ii=0;ii<100;ii++) {
-			Vec3 position = new Vec3(0,ii*fac,0);
+		double fac =-7;
+		for(int ii=0;ii<60;ii++) {
+			Vec3 position = new Vec3(ii*ii*fac,ii*ii*fac,ii*fac);
 			SequenceSet seq = new SequenceSet(ii,position);
 			sequenceList.add(new SequenceSet(ii,position));
 		}
 		testAnimationFile.setSequenceList(sequenceList);
 		animationFile = testAnimationFile;
+	}
+	
+	private Vec3 findFrameData(double time, AnimationFile animationFile, int animationFrame) {
+		Vec3 position = new Vec3(0,0,0);
+		List<SequenceSet> sequenceList = animationFile.getSequence();
+		
+		for(int i=animationFrame;i<animationFile.getSequenceLength();i++) {
+			if ( Math.abs(sequenceList.get(i).time - time) >  Math.abs(sequenceList.get(i-1).time - time)) {
+				this.animationFrame=i;
+				return sequenceList.get(i-1).position ;
+			}
+		}		
+		return position;
+	}
+	
+	private Vec3 findFrameData(double time, AnimationFile animationFile, int animationFrame, boolean withInterpolation) {
+		Vec3 position = new Vec3(0,0,0);
+		double keyTest = 0 ;
+		List<SequenceSet> sequenceList = animationFile.getSequence();
+		
+		for(int i=animationFrame;i<animationFile.getSequenceLength();i++) {
+			
+			 keyTest = sequenceList.get(i-1).time - time ;
+			if ( Math.abs(sequenceList.get(i).time - time) >  Math.abs(keyTest) ){
+				this.animationFrame=i;
+				if ( keyTest > 0 ) {
+					position.x = interpolate.linear(sequenceList.get(i-2).time      , sequenceList.get(i-1).time, 
+													sequenceList.get(i-2).position.x, sequenceList.get(i-1).position.x, 
+													time - sequenceList.get(i-2).time );
+					position.y = interpolate.linear(sequenceList.get(i-2).time      , sequenceList.get(i-1).time, 
+													sequenceList.get(i-2).position.y, sequenceList.get(i-1).position.y, 
+													time - sequenceList.get(i-2).time );
+					position.z = interpolate.linear(sequenceList.get(i-2).time      , sequenceList.get(i-1).time, 
+													sequenceList.get(i-2).position.z, sequenceList.get(i-1).position.z, 
+													time - sequenceList.get(i-2).time );
+					/*
+					System.out.println(    Formats.decform03.format( time )+" "+
+											"1 "+
+											Formats.decform01.format( keyTest )+" "+
+											Formats.decform01.format( sequenceList.get(i-2).time )+" "+
+											Formats.decform01.format( sequenceList.get(i-1).time )+" "+
+											Formats.decform01.format( position.y )+" "+
+											Formats.decform01.format( sequenceList.get(i-2).position.y )+" "+
+											Formats.decform01.format( sequenceList.get(i-1).position.y ) );
+											*/
+				} else if (keyTest == 0) {
+					position = sequenceList.get(i-1).position;
+				} else {
+					position.x = interpolate.linear(sequenceList.get(i-1).time      , sequenceList.get(i).time, 
+													sequenceList.get(i-1).position.x, sequenceList.get(i).position.x, 
+													time - sequenceList.get(i-1).time );
+					position.y = interpolate.linear(sequenceList.get(i-1).time      , sequenceList.get(i).time, 
+													sequenceList.get(i-1).position.y, sequenceList.get(i).position.y, 
+													time - sequenceList.get(i-1).time );
+					position.z = interpolate.linear(sequenceList.get(i-1).time      , sequenceList.get(i).time, 
+													sequenceList.get(i-1).position.z, sequenceList.get(i).position.z, 
+													time - sequenceList.get(i-1).time );
+					/*
+					System.out.println(     Formats.decform03.format( time )+" "+
+											"2 "+
+										    Formats.decform01.format( keyTest )+" "+
+											Formats.decform01.format( sequenceList.get(i-1).time )+" "+
+											Formats.decform01.format( sequenceList.get(i).time )+" "+
+											Formats.decform01.format( position.y )+" "+
+											Formats.decform01.format( sequenceList.get(i-1).position.y )+" "+
+											Formats.decform01.format( sequenceList.get(i).position.y ) );
+											*/
+					
+				}
+				
+				return position;
+			}
+		}		
+		return position;
 	}
 	
 }

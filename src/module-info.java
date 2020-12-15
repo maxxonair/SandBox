@@ -4,6 +4,7 @@ module Sandbox {
 	requires javafx.swing;
 	requires jimObjModelImporterJFX;
 	requires javafx.base;
+	requires java.desktop;
 	exports gui;
 	exports worldWindow;
 	exports animate;
