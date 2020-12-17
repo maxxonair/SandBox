@@ -1,14 +1,8 @@
 package gui;
 
-import java.text.DecimalFormat;
-
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.SubScene;
-import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,14 +13,13 @@ public class GuiMain extends Application {
 	private static Stage window;
 	private String windowTitle = "SandBox Environment Mark1";
 	
-	private String objectFilePath = "";
+	//private String objectFilePath = "";
 	
 	  public static void main(String[] args) {
 			// Start GUI
 		    launch(args);
 		  }
 	  
-	  @SuppressWarnings({ "unchecked", "rawtypes" })
 	  public void start(@SuppressWarnings("exports") Stage primaryStage) {
 			window = primaryStage;
 			window.setOnCloseRequest(e -> {

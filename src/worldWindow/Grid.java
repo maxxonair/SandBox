@@ -10,6 +10,7 @@ import javafx.scene.transform.Translate;
 
 public class Grid {
 
+	@SuppressWarnings("exports")
 	public static Group createGrid(float size, float delta) {
 	    if (delta < 1) {
 	        delta = 1;

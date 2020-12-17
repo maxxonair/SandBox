@@ -60,7 +60,8 @@ private AnchorPane anchorPane;
 //---------------------------------------------------------------------------
 // Environment settings 
 //---------------------------------------------------------------------------
-private float GRID_SIZE = 8000;
+private float GRID_SIZE = 100000;
+private float GRID_RESOLUTION = 500;
 //---------------------------------------------------------------------------
 // Mouse control  
 //---------------------------------------------------------------------------
@@ -141,14 +142,18 @@ private Label HUD_animationTime;
                 rotateY = new Rotate(0, Rotate.Y_AXIS),
                 rotateX = new Rotate(-35, Rotate.X_AXIS)
         );
-		
+		/*
 		camera.setTranslateX(0);
 		camera.setTranslateY(-300);
 		camera.setTranslateZ(-1000);
+		*/
+		camera.setTranslateX(-6125);
+		camera.setTranslateY(-21075);
+		camera.setTranslateZ(-25050);
 		//---------------------------------------------------------------------------
 		// Environment
 		//---------------------------------------------------------------------------
-		final Group grid = Grid.createGrid(GRID_SIZE, 100);
+		final Group grid = Grid.createGrid(GRID_SIZE, GRID_RESOLUTION);
 		
 		Group environment = new Group();
 		environment.getChildren().add(grid);
@@ -242,7 +247,7 @@ private Label HUD_animationTime;
        //---------------------------------------------------------------------------
        // Final setup
        //---------------------------------------------------------------------------
-	   moveCameraTo(-250, -500, -250);
+	  // moveCameraTo(-250, -500, -250);
         
 	}
 	

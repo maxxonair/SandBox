@@ -52,6 +52,7 @@ import worldWindow.SubdivisionMesh.MapBorderMode;
 /**
  * A MeshView node for Polygon Meshes
  */
+@SuppressWarnings("exports")
 public class PolygonMeshView extends Parent {
     private static final boolean DEBUG = false;
     private final MeshView meshView = new MeshView();
@@ -116,7 +117,7 @@ public class PolygonMeshView extends Parent {
      */
     private ObjectProperty<DrawMode> drawMode;
     public final void setDrawMode(DrawMode value) { drawModeProperty().set(value); }
-    public final DrawMode getDrawMode() { return drawMode == null ? DrawMode.FILL : drawMode.get(); }
+	public final DrawMode getDrawMode() { return drawMode == null ? DrawMode.FILL : drawMode.get(); }
     public final ObjectProperty<DrawMode> drawModeProperty() {
         if (drawMode == null) {
             drawMode = new SimpleObjectProperty<DrawMode>(PolygonMeshView.this, "drawMode", DrawMode.FILL) {

@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
- 
+@SuppressWarnings("exports")
 public class TimelineEvents extends Application {
     
     //main timeline
@@ -72,7 +72,8 @@ public class TimelineEvents extends Application {
         //create a keyFrame, the keyValue is reached at time 2s
         Duration duration = Duration.millis(2000);
         //one can add a specific action when the keyframe is reached
-        EventHandler onFinished = new EventHandler<ActionEvent>() {
+        @SuppressWarnings("rawtypes")
+		EventHandler onFinished = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                  stack.setTranslateX(java.lang.Math.random()*200-100);
                  //reset counter

@@ -49,10 +49,11 @@ import javafx.scene.transform.Translate;
  * pre-multiply by the worldMatrix. (p' = wm * p) matrix = [T][IS][JO][R][SO][S] where R = [RZ][RY][RX]  (Note: order is
  * determined by rotateOrder) Of these sub-matrices we can set [SO] to identity, so matrix = [T][IS][JO][R][S]
  */
+@SuppressWarnings("exports")
 public class Joint extends Group {
     public final Translate t = new Translate();
 
-    public final Rotate jox = new Rotate();
+	public final Rotate jox = new Rotate();
 
     { jox.setAxis(Rotate.X_AXIS); }
 

@@ -51,6 +51,7 @@ import javafx.scene.transform.Transform;
  * PolygonMesh that knows how to update itself given changes in joint transforms.
  * The mesh can be updated with an AnimationTimer.
  */
+@SuppressWarnings("exports")
 public class SkinningMesh extends PolygonMesh {
     private final float[][] relativePoints; // nJoints x nPoints*3
     private final float[][] weights; // nJoints x nPoints
@@ -73,7 +74,8 @@ public class SkinningMesh extends PolygonMesh {
      * @param joints A list of joints used for skinning; the order of these are associated with the respective attributes of @weights and @bindTransforms
      * @param jointForest A list of the top level trees that contain the joints; all the @joints should be contained in this forest
      */
-    public SkinningMesh(PolygonMesh mesh, float[][] weights, Affine[] bindTransforms, Affine bindGlobalTransform, List<Joint> joints, List<Parent> jointForest) {
+    @SuppressWarnings({ "unchecked", "deprecation" })
+	public SkinningMesh(PolygonMesh mesh, float[][] weights, Affine[] bindTransforms, Affine bindGlobalTransform, List<Joint> joints, List<Parent> jointForest) {
         this.getPoints().addAll(mesh.getPoints());
         this.getTexCoords().addAll(mesh.getTexCoords());
         this.faces = mesh.faces;

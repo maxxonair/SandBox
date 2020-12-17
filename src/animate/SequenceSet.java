@@ -3,6 +3,7 @@ package animate;
 import utils.Quaternion;
 import utils.Vec3;
 
+@SuppressWarnings("exports")
 public class SequenceSet {
 	
 	public double time;
@@ -10,7 +11,9 @@ public class SequenceSet {
 	public Quaternion attitude;
 
 	public SequenceSet() {
-		
+		this.time=0;
+		this.position = new Vec3(0,0,0);
+		this.attitude = new Quaternion(1,0,0,0);
 	}
 	
 	public SequenceSet(double time, Vec3 position) {

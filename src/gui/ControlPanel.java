@@ -8,6 +8,7 @@ import worldWindow.WorldView;
 public class ControlPanel {
 
 	private AnchorPane controlPanel;
+	@SuppressWarnings("unused")
 	private WorldView worldView; 
 	
 	private double minWidth = 250;
@@ -42,6 +43,7 @@ public class ControlPanel {
 	    controlPanel.getChildren().add(contentLayout);
 	}
 
+	@SuppressWarnings("exports")
 	public AnchorPane getControlPanel() {
 		return controlPanel;
 	}

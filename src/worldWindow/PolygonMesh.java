@@ -41,6 +41,7 @@ import javafx.collections.ObservableIntegerArray;
  *
  * can convert to using ObservableIntegerArray
  */
+@SuppressWarnings("exports")
 public class PolygonMesh {
     private final ObservableFloatArray points = FXCollections.observableFloatArray();
     private final ObservableFloatArray texCoords = FXCollections.observableFloatArray();
@@ -56,7 +57,7 @@ public class PolygonMesh {
         this.faces = faces;
     }
 
-    public ObservableFloatArray getPoints() {
+	public ObservableFloatArray getPoints() {
         return points;
     }
 

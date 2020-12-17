@@ -15,6 +15,7 @@ public class Animation {
 	private int animationFrame;
 	private Interpolator interpolate = new Interpolator();
 	
+	@SuppressWarnings("unused")
 	private WorldView worldView;
 	
 	private AnimationTimer animationTimer;
@@ -24,7 +25,7 @@ public class Animation {
 	private boolean animation_running;
 	private boolean animation_pause;
 	
-	private Integer frame;
+	//private Integer frame;
 	private long startTime;
 	private boolean timeFlag=false;
 	
@@ -108,13 +109,13 @@ public class Animation {
 		double fac =-7;
 		for(int ii=0;ii<60;ii++) {
 			Vec3 position = new Vec3(ii*ii*fac,ii*ii*fac,ii*fac);
-			SequenceSet seq = new SequenceSet(ii,position);
 			sequenceList.add(new SequenceSet(ii,position));
 		}
 		testAnimationFile.setSequenceList(sequenceList);
 		animationFile = testAnimationFile;
 	}
 	
+	@SuppressWarnings("unused")
 	private Vec3 findFrameData(double time, AnimationFile animationFile, int animationFrame) {
 		Vec3 position = new Vec3(0,0,0);
 		List<SequenceSet> sequenceList = animationFile.getSequence();
@@ -148,16 +149,6 @@ public class Animation {
 					position.z = interpolate.linear(sequenceList.get(i-2).time      , sequenceList.get(i-1).time, 
 													sequenceList.get(i-2).position.z, sequenceList.get(i-1).position.z, 
 													time - sequenceList.get(i-2).time );
-					/*
-					System.out.println(    Formats.decform03.format( time )+" "+
-											"1 "+
-											Formats.decform01.format( keyTest )+" "+
-											Formats.decform01.format( sequenceList.get(i-2).time )+" "+
-											Formats.decform01.format( sequenceList.get(i-1).time )+" "+
-											Formats.decform01.format( position.y )+" "+
-											Formats.decform01.format( sequenceList.get(i-2).position.y )+" "+
-											Formats.decform01.format( sequenceList.get(i-1).position.y ) );
-											*/
 				} else if (keyTest == 0) {
 					position = sequenceList.get(i-1).position;
 				} else {
@@ -170,16 +161,6 @@ public class Animation {
 					position.z = interpolate.linear(sequenceList.get(i-1).time      , sequenceList.get(i).time, 
 													sequenceList.get(i-1).position.z, sequenceList.get(i).position.z, 
 													time - sequenceList.get(i-1).time );
-					/*
-					System.out.println(     Formats.decform03.format( time )+" "+
-											"2 "+
-										    Formats.decform01.format( keyTest )+" "+
-											Formats.decform01.format( sequenceList.get(i-1).time )+" "+
-											Formats.decform01.format( sequenceList.get(i).time )+" "+
-											Formats.decform01.format( position.y )+" "+
-											Formats.decform01.format( sequenceList.get(i-1).position.y )+" "+
-											Formats.decform01.format( sequenceList.get(i).position.y ) );
-											*/
 					
 				}
 				
