@@ -35,6 +35,9 @@ public class AnimationPanel {
 		Button start = new Button("start");
 		Button pause = new Button("pause");
 		Button stop = new Button("stop");
+		
+		Button thirdPersonView = new Button("TPV");
+		
 		Label loadedFileLabel = new Label("");
 		Label durationLabel = new Label("");
 		Label frequencyLabel = new Label("");
@@ -44,6 +47,7 @@ public class AnimationPanel {
 		statisticsPanel.getChildren().add(loadedFileLabel);
 		statisticsPanel.getChildren().add(durationLabel);
 		statisticsPanel.getChildren().add(frequencyLabel);
+		statisticsPanel.getChildren().add(thirdPersonView);
 		
 		final FileChooser fileChooser = new FileChooser();
 		Button openFile = new Button("Open");
@@ -71,21 +75,30 @@ public class AnimationPanel {
 		    }
 		});
 		
+		thirdPersonView.setOnAction(new EventHandler<ActionEvent>() {
+		    @Override public void handle(ActionEvent e) {
+		    	if ( worldView.isThirdPersonCamera() ) {
+		    		worldView.setThirdPersonCamera(false);
+		    	} else {
+		    		worldView.setThirdPersonCamera(true);
+		    	}
+		    }
+		});
+		
 		openFile.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override public void handle(ActionEvent e) {
 		    	Stage stage = new Stage();
                 File file = fileChooser.showOpenDialog(stage);
                 if (file != null) {
                 	try {
-	                	fileLoader.loadTextData(file, 0.000001);
-	                	AnimationFile animationFile = fileLoader.loadTextData(file, 0.1) ;
+	                	AnimationFile animationFile = fileLoader.loadCsvData(file, 0.1) ;
 	                	
 	                	animation.setAnimationFile(animationFile);
 	                	// Update indicator label
 	                	String[] pathElements = file.getPath().split(FILE_DELIMITER);
 	                	loadedFileLabel.setText("Loaded Animation File:  "+pathElements[pathElements.length-1]);
-	                	durationLabel.setText("Duration:  "+Formats.decform01.format(animationFile.getMaxTime()));
-	                	frequencyLabel.setText("Source Frequency:  "+Formats.decform01.format(animationFile.getFrequency()));
+	                	durationLabel.setText("Duration:  "+Formats.decform01.format(animationFile.getMaxTime())+" [s]");
+	                	frequencyLabel.setText("Source Frequency:  "+Formats.decform01.format(animationFile.getFrequency())+" [Hz]");
 	                	
                 	} catch (Exception exp ) {
                 		System.out.println(exp);

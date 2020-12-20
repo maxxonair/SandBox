@@ -22,8 +22,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.CullFace;
-import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
@@ -62,6 +60,10 @@ private AnchorPane anchorPane;
 //---------------------------------------------------------------------------
 private float GRID_SIZE = 100000;
 private float GRID_RESOLUTION = 500;
+
+private Group environment;
+
+private boolean isGrid = true;
 //---------------------------------------------------------------------------
 // Mouse control  
 //---------------------------------------------------------------------------
@@ -83,8 +85,13 @@ private double cameraToTargetDistance = 0;
 private boolean running, goNorth, goSouth, goEast, goWest;
 
 //private boolean isZoom = false;
-
+// Camera Field of View [deg]]:
 private double CAMERA_FOV = 40;
+// Third person camera activated:
+private boolean thirdPersonCamera = false; 
+// Default Positions:
+private Vec3 DEFAULT_CAMERA_POSITION = new Vec3(-6125,-21075,-25050);
+private Vec3 DEFAULT_RELATIVE_CAMERA_POSITION = new Vec3(-150,-650,-1000);
 //---------------------------------------------------------------------------
 // Model control 
 //---------------------------------------------------------------------------
@@ -104,12 +111,13 @@ private Rotate rotateX,rotateY;
 //---------------------------------------------------------------------------
 private Label HUD_cameraPosition;
 private Label HUD_modelPosition;
+private Label HUD_modelAttitude;
 private Label HUD_animationTime;
 //---------------------------------------------------------------------------
 // 
 //---------------------------------------------------------------------------
 	@Override
-	public void start(Stage stage) throws Exception{
+	public void start(@SuppressWarnings("exports") Stage stage) throws Exception{
 		//---------------------------------------------------------------------------
 		// Model 
 		//---------------------------------------------------------------------------
@@ -142,25 +150,21 @@ private Label HUD_animationTime;
                 rotateY = new Rotate(0, Rotate.Y_AXIS),
                 rotateX = new Rotate(-35, Rotate.X_AXIS)
         );
-		/*
-		camera.setTranslateX(0);
-		camera.setTranslateY(-300);
-		camera.setTranslateZ(-1000);
-		*/
-		camera.setTranslateX(-6125);
-		camera.setTranslateY(-21075);
-		camera.setTranslateZ(-25050);
+		camera.setTranslateX(DEFAULT_CAMERA_POSITION.x);
+		camera.setTranslateY(DEFAULT_CAMERA_POSITION.y);
+		camera.setTranslateZ(DEFAULT_CAMERA_POSITION.z);
 		//---------------------------------------------------------------------------
 		// Environment
 		//---------------------------------------------------------------------------
 		final Group grid = Grid.createGrid(GRID_SIZE, GRID_RESOLUTION);
 		
-		Group environment = new Group();
-		environment.getChildren().add(grid);
+	    environment = new Group();
+		if ( isGrid ) {
+			environment.getChildren().add(grid);	
+		}
 		
 		double translateGrid = 0;
 		environment.setTranslateX(-translateGrid);
-		
 		
 		root.getChildren().add(environment);
 		root.getChildren().add(camera);
@@ -219,8 +223,14 @@ private Label HUD_animationTime;
                 if (goEast)  dx += pace;
                 if (goWest)  dx -= pace;
                 if (running) { dz = -dy ; dy = 0 ; }
-
-                moveCameraBy(dx, dy, dz);
+                
+                if (thirdPersonCamera) {
+                	DEFAULT_RELATIVE_CAMERA_POSITION.x += dx;
+                	DEFAULT_RELATIVE_CAMERA_POSITION.y += dy;
+                	DEFAULT_RELATIVE_CAMERA_POSITION.z += dz;
+                } else {
+                	moveCameraBy(dx, dy, dz);
+                }
             }
         };
         timer.start();
@@ -230,16 +240,19 @@ private Label HUD_animationTime;
        //---------------------------------------------------------------------------
        // Head-on Display
        //---------------------------------------------------------------------------
-	    HUD_cameraPosition = new Label("Camera position [x y z]: ["+camera.getLayoutX()+"  "+camera.getLayoutY()+"  "+camera.getTranslateX()+"]");
+	    HUD_cameraPosition = new Label("Camera position (x y z) [m]: ["+camera.getLayoutX()+"  "+camera.getLayoutY()+"  "+camera.getTranslateZ()+"]");
 	    HUD_cameraPosition.setLayoutY(0);
-	    HUD_modelPosition = new Label("Model position [x y z]: ["+model.getTranslateY()+"  "+model.getTranslateY()+"  "+model.getTranslateY()+"]");
+	    HUD_modelPosition = new Label("Model position (x y z) [m]: ["+model.getTranslateY()+"  "+model.getTranslateY()+"  "+model.getTranslateZ()+"]");
 	    HUD_modelPosition.setLayoutY(20);
+	    HUD_modelAttitude = new Label("Model attitude (r p y) [deg]: ["+getModelAttitude().x+"  "+getModelAttitude().y+"  "+getModelAttitude().z+"]");
+	    HUD_modelAttitude.setLayoutY(40);
 	    HUD_animationTime = new Label("Time [s]: 0");
-	    HUD_animationTime.setLayoutY(40);
+	    HUD_animationTime.setLayoutY(60);
 	    
 	    Group HUD_Elements = new Group();
 	    HUD_Elements.getChildren().add(HUD_cameraPosition);
 	    HUD_Elements.getChildren().add(HUD_modelPosition);
+	    HUD_Elements.getChildren().add(HUD_modelAttitude);
 	    HUD_Elements.getChildren().add(HUD_animationTime);
         
 		anchorPane.getChildren().add(HUD_Elements);
@@ -247,12 +260,11 @@ private Label HUD_animationTime;
        //---------------------------------------------------------------------------
        // Final setup
        //---------------------------------------------------------------------------
-	  // moveCameraTo(-250, -500, -250);
-        
 	}
 	
 	
-    private void moveCameraBy(int dx, int dy) {
+    @SuppressWarnings("unused")
+	private void moveCameraBy(int dx, int dy) {
        // if (dx == 0 && dy == 0) return;
 
         final double cx = camera.getBoundsInLocal().getWidth()  / 2;
@@ -267,8 +279,8 @@ private Label HUD_animationTime;
     private void moveCameraBy(int dx, int dy, int dz) {
         // if (dx == 0 && dy == 0) return;
 
-         final double cx = camera.getBoundsInLocal().getWidth()  / 2;
-         final double cy = camera.getBoundsInLocal().getHeight() / 2;
+        // final double cx = camera.getBoundsInLocal().getWidth()  / 2;
+        // final double cy = camera.getBoundsInLocal().getHeight() / 2;
 
          double x =  camera.getTranslateX() + dx;
          double y =  camera.getTranslateY() + dy;
@@ -297,24 +309,33 @@ private Label HUD_animationTime;
         model.setTranslateY(y);
         model.setTranslateZ(z);
         updateHUD();
+        if (thirdPersonCamera) {
+            camera.setTranslateX(x+DEFAULT_RELATIVE_CAMERA_POSITION.x);
+            camera.setTranslateY(y+DEFAULT_RELATIVE_CAMERA_POSITION.y);
+            camera.setTranslateZ(z+DEFAULT_RELATIVE_CAMERA_POSITION.z);
+        } else {
+    		camera.setTranslateX(DEFAULT_CAMERA_POSITION.x);
+    		camera.setTranslateY(DEFAULT_CAMERA_POSITION.y);
+    		camera.setTranslateZ(DEFAULT_CAMERA_POSITION.z);
+        }
     }
 	
-	public void modelRotation(Quaternion q) {
+	@SuppressWarnings("exports")
+	public void roateModelTo(Quaternion q) {
 			Quaternion qInverse=new Quaternion();
-			try {
-				qInverse = (Quaternion) quatTemp.clone();
-			} catch (CloneNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			qInverse.w = quatTemp.w;
+			qInverse.x = quatTemp.x;
+			qInverse.y = quatTemp.y;
+			qInverse.z = quatTemp.z;
 			qInverse.inverse();
-			Vector4 vec = matrixRotateNode1(qInverse);
+			
+			Vector4 vec = matrixRotateNode(qInverse);
 			Point3D rotAxis = new Point3D(vec.x, vec.y, vec.z);
 			double  rotAngle =vec.w;
             model.setRotationAxis(rotAxis);
             model.setRotate(rotAngle);   
 
-            vec = matrixRotateNode1(q);
+            vec = matrixRotateNode(q);
             if (vec != new Vector4(0,0,0,0)) {
 				rotAxis = new Point3D(vec.x, vec.y, vec.z);
 				rotAngle =vec.w;
@@ -325,7 +346,8 @@ private Label HUD_animationTime;
             }			
 	}
 	    
-    public Vector4 matrixRotateNode1(Quaternion q ){
+    @SuppressWarnings("exports")
+	public Vector4 matrixRotateNode(Quaternion q ){
     	
     	Vector4 result = new Vector4(0,0,0,0);
     	
@@ -354,6 +376,7 @@ private Label HUD_animationTime;
         return result;
     }	
 	
+	@SuppressWarnings("unused")
 	private   void initMouseControl(SubScene scene, Camera camera) {
 		
 		/**
@@ -432,31 +455,27 @@ private Label HUD_animationTime;
 	}
 	
 
+@SuppressWarnings("exports")
 public SubScene getScene() {
 		return scene;
-	}
+}
 
 private   SmartGroup loadModel(String fileString) {
     SmartGroup modelRoot = new SmartGroup();
 	PhongMaterial material = new PhongMaterial();
     material.setDiffuseColor(Color.SILVER);
     ObjModelImporter importer = new ObjModelImporter();
-   // importer.read(url);
-   // try {
+
     importer.read(fileString);
 
     for (MeshView view : importer.getImport()) {
         modelRoot.getChildren().add(view);
         view.setMaterial(material);
     }
-    /*
-    } catch (Exception exp) {
-    	System.out.println("Error: Loading 3D Model failed.");
-    }
-*/
-modelRoot.setScaleX(modelScale);
-modelRoot.setScaleY(modelScale);
-modelRoot.setScaleZ(modelScale);
+
+	modelRoot.setScaleX(modelScale);
+	modelRoot.setScaleY(modelScale);
+	modelRoot.setScaleZ(modelScale);
     return modelRoot;
 }
 
@@ -474,6 +493,7 @@ public void setModelObjectPath(String modelObjectPath) {
 	this.modelObjectPath = modelObjectPath;
 }
 
+@SuppressWarnings("exports")
 public WorldView(String objectFilePath, Scene scene) {
 	this.modelObjectPath = objectFilePath; 
 	this.parentScene = scene;
@@ -493,6 +513,7 @@ public double getSceneWidth() {
 	return sceneWidth;
 }
 
+@SuppressWarnings("exports")
 public AnchorPane getAnchorPane() {
 	return anchorPane;
 }
@@ -502,11 +523,9 @@ public void setSceneWidth(double sceneWidth) {
 	this.sceneWidth = sceneWidth;
     scene.setWidth(sceneWidth);
     //moveCameraTo(0,0);
-}
-/*
-public static void main(String[] args) {launch(args);}
-*/	
+}	
 
+@SuppressWarnings("exports")
 public Vec3 getCameraPosition() {
 	Vec3 cameraPosition = new Vec3();
 	cameraPosition.x = camera.getTranslateX();
@@ -515,6 +534,7 @@ public Vec3 getCameraPosition() {
 	return cameraPosition;
 }
 
+@SuppressWarnings("exports")
 public Vec3 getModelPosition() {
 	Vec3 modelPosition = new Vec3();
 	modelPosition.x = model.getTranslateX();
@@ -524,10 +544,12 @@ public Vec3 getModelPosition() {
 }
 
 private void updateHUD() {
-	HUD_cameraPosition.setText("Camera position [x y z ]: ["+Formats.decform01.format(camera.getTranslateX())+
+	HUD_cameraPosition.setText("Camera position [x y z ]: ["+
+				 Formats.decform01.format(camera.getTranslateX())+
 			"  "+Formats.decform01.format(camera.getTranslateY())+
 			"  "+Formats.decform01.format(camera.getTranslateZ())+"]");
-	HUD_modelPosition.setText("Model position [x y z ]: ["+Formats.decform01.format(model.getTranslateX())+"  "+
+	HUD_modelPosition.setText("Model position [x y z ]: ["+
+			Formats.decform01.format(model.getTranslateX())+"  "+
 			Formats.decform01.format(model.getTranslateY())+"  "+
 			Formats.decform01.format(model.getTranslateZ())+"]");
 }
@@ -535,4 +557,26 @@ private void updateHUD() {
 public void setAnimationTime(double time) {
 	HUD_animationTime.setText("Time [s]: "+Formats.decform01.format(time));
 }
+
+
+public void setThirdPersonCamera(boolean thirdPersonCamera) {
+	this.thirdPersonCamera = thirdPersonCamera;
+}
+
+
+public boolean isThirdPersonCamera() {
+	return thirdPersonCamera;
+}
+
+private Vec3 getModelAttitude() {
+	Vec3 rollPitchYaw = new Vec3(0,0,0);
+	
+	return rollPitchYaw;
+}
+
+public void updateModelAttitude(Quaternion q) {
+	HUD_modelAttitude.setText("Model attitude (w x y z) []: ["+q.w+"  "+q.x+"  "+q.y+" "+q.z+"]");
+}
+
+
 }

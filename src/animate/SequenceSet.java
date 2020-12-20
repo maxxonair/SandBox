@@ -19,6 +19,7 @@ public class SequenceSet {
 	public SequenceSet(double time, Vec3 position) {
 		this.time=time;
 		this.position=position;
+		this.attitude = new Quaternion(1,0,0,0);
 	}
 	
 	public SequenceSet(double time, Vec3 position, Quaternion attitude) {

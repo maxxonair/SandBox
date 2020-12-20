@@ -37,7 +37,7 @@ public class ControlPanel {
 
 	    AnimationPanel animationPanel = new AnimationPanel(worldView);
 	    
-	    contentLayout.getChildren().add(modelXSlider);
+	   // contentLayout.getChildren().add(modelXSlider);
 	    contentLayout.getChildren().add(animationPanel.getContentPanel());
 	    
 	    controlPanel.getChildren().add(contentLayout);
