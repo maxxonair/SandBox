@@ -121,6 +121,16 @@ public class Quaternion extends Object implements Cloneable{
     	return cosineMatrix;
     }
     
+    public Vec3 getRollPitchYaw() {
+    	Vec3 rollPitchYaw = new Vec3(0,0,0);
+     	
+    	rollPitchYaw.x = Math.atan2( (y*z + w*x) , (0.5 - (x*x - y*y) ) );
+    	rollPitchYaw.y = Math.asin( -2 * ( x*z - w*y) );
+    	rollPitchYaw.z = Math.atan2( ( x*y + w*z ) , ( 0.5 - (y*y + z*z) ) );
+    	
+		return rollPitchYaw;   	
+    }
+    
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 

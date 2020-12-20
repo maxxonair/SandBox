@@ -79,8 +79,10 @@ public class AnimationPanel {
 		    @Override public void handle(ActionEvent e) {
 		    	if ( worldView.isThirdPersonCamera() ) {
 		    		worldView.setThirdPersonCamera(false);
+		    		worldView.setCameraToAbsoluteDefaultPosition();
 		    	} else {
 		    		worldView.setThirdPersonCamera(true);
+		    		worldView.setCameraToRelativeDefaultPostion();
 		    	}
 		    }
 		});

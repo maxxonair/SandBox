@@ -40,6 +40,7 @@ public class LoadFromFile {
 			SequenceSet sequenceSet = new SequenceSet();
 			Object[] tokens = strLine.split(delimiter);
 			sequenceSet.time 		= Double.parseDouble( (String) tokens[0]  );
+			
 			sequenceSet.position.x 	= Double.parseDouble( (String) tokens[41] );
 			sequenceSet.position.y 	= Double.parseDouble( (String) tokens[42] );
 			sequenceSet.position.z 	= Double.parseDouble( (String) tokens[43] );
@@ -83,6 +84,7 @@ public class LoadFromFile {
 			SequenceSet sequenceSet = new SequenceSet();
 			Object[] tokens = strLine.split(delimiter);
 			sequenceSet.time 		= Double.parseDouble( (String) tokens[0]  );
+			
 			sequenceSet.position.x 	= Double.parseDouble( (String) tokens[1] );
 			sequenceSet.position.y 	= Double.parseDouble( (String) tokens[2] );
 			sequenceSet.position.z 	= Double.parseDouble( (String) tokens[3] );

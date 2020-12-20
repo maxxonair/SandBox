@@ -1,6 +1,5 @@
 package gui;
 
-import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import worldWindow.WorldView;
@@ -21,7 +20,7 @@ public class ControlPanel {
 	    VBox contentLayout = new VBox(3);
 	    
 	    this.worldView = worldView;
-	    
+	    /*
 	    Slider modelXSlider = new Slider();
 	    modelXSlider.setMin(-1000);
 	    modelXSlider.setMax(1000);
@@ -34,11 +33,12 @@ public class ControlPanel {
 	    						  modelXSlider.getValue(),  
 	    						  worldView.getModelPosition().z);	
 	    });
-
+	     */
 	    AnimationPanel animationPanel = new AnimationPanel(worldView);
+	    EnvironmentPanel environmentPanel = new EnvironmentPanel(worldView);
 	    
-	   // contentLayout.getChildren().add(modelXSlider);
 	    contentLayout.getChildren().add(animationPanel.getContentPanel());
+	    contentLayout.getChildren().add(environmentPanel.getContentPanel());
 	    
 	    controlPanel.getChildren().add(contentLayout);
 	}

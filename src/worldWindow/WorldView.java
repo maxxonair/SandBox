@@ -58,12 +58,17 @@ private AnchorPane anchorPane;
 //---------------------------------------------------------------------------
 // Environment settings 
 //---------------------------------------------------------------------------
-private float GRID_SIZE = 100000;
+private float GRID_SIZE = 70000;
 private float GRID_RESOLUTION = 500;
 
 private Group environment;
-
+private Group grid;
+// Is grid view active 
 private boolean isGrid = true;
+// Is flat, textured ground active 
+private boolean isFlatEarth = false;
+// Is height map + textured ground active 
+private boolean isCurvedEarth = false;
 //---------------------------------------------------------------------------
 // Mouse control  
 //---------------------------------------------------------------------------
@@ -91,7 +96,7 @@ private double CAMERA_FOV = 40;
 private boolean thirdPersonCamera = false; 
 // Default Positions:
 private Vec3 DEFAULT_CAMERA_POSITION = new Vec3(-6125,-21075,-25050);
-private Vec3 DEFAULT_RELATIVE_CAMERA_POSITION = new Vec3(-150,-650,-1000);
+private Vec3 DEFAULT_RELATIVE_CAMERA_POSITION = new Vec3(-650,-650,-1000);
 //---------------------------------------------------------------------------
 // Model control 
 //---------------------------------------------------------------------------
@@ -106,6 +111,7 @@ private Quaternion quatTemp = new Quaternion(1,0,0,0);
 @SuppressWarnings("unused")
 private Translate translate;
 private Rotate rotateX,rotateY;
+private Quaternion ModelAttitude = new Quaternion(1,0,0,0);
 //---------------------------------------------------------------------------
 //  Head-up Display controls 
 //---------------------------------------------------------------------------
@@ -156,12 +162,10 @@ private Label HUD_animationTime;
 		//---------------------------------------------------------------------------
 		// Environment
 		//---------------------------------------------------------------------------
-		final Group grid = Grid.createGrid(GRID_SIZE, GRID_RESOLUTION);
+		grid = Grid.createGrid(GRID_SIZE, GRID_RESOLUTION);
 		
 	    environment = new Group();
-		if ( isGrid ) {
-			environment.getChildren().add(grid);	
-		}
+	    resetEnvironment();
 		
 		double translateGrid = 0;
 		environment.setTranslateX(-translateGrid);
@@ -569,13 +573,77 @@ public boolean isThirdPersonCamera() {
 }
 
 private Vec3 getModelAttitude() {
-	Vec3 rollPitchYaw = new Vec3(0,0,0);
-	
-	return rollPitchYaw;
+	return ModelAttitude.getRollPitchYaw();
 }
 
+@SuppressWarnings("exports")
 public void updateModelAttitude(Quaternion q) {
-	HUD_modelAttitude.setText("Model attitude (w x y z) []: ["+q.w+"  "+q.x+"  "+q.y+" "+q.z+"]");
+
+	this.ModelAttitude = q;
+	Vec3 rollPitchYaw = getModelAttitude();
+	
+	HUD_modelAttitude.setText("Model attitude (r p y) [deg]: ["+
+			Formats.decform01.format(Math.toDegrees(rollPitchYaw.x))+"  "+
+			Formats.decform01.format(Math.toDegrees(rollPitchYaw.y))+"  "+
+			Formats.decform01.format(Math.toDegrees(rollPitchYaw.z))+"]");
+}
+
+public void setCameraToAbsoluteDefaultPosition() {
+	camera.setTranslateX(DEFAULT_CAMERA_POSITION.x);
+	camera.setTranslateY(DEFAULT_CAMERA_POSITION.y);
+	camera.setTranslateZ(DEFAULT_CAMERA_POSITION.z);
+	updateHUD();
+}
+
+public void setCameraToRelativeDefaultPostion() {
+    camera.setTranslateX(getModelPosition().x+DEFAULT_RELATIVE_CAMERA_POSITION.x);
+    camera.setTranslateY(getModelPosition().y+DEFAULT_RELATIVE_CAMERA_POSITION.y);
+    camera.setTranslateZ(getModelPosition().z+DEFAULT_RELATIVE_CAMERA_POSITION.z);
+    updateHUD();
+}
+
+public void selectGridView() {
+	isGrid 		  = true;
+	isFlatEarth   = false;
+	isCurvedEarth = false;
+	resetEnvironment();
+}
+
+public void selectFlatEarth() {
+	isGrid 		  = false;
+	isFlatEarth   = true;
+	isCurvedEarth = false;
+	resetEnvironment();
+}
+
+public void selectCurvedEarth() {
+	isGrid 		  = false;
+	isFlatEarth   = false;
+	isCurvedEarth = true;
+	resetEnvironment();
+}
+
+public void selectNoGround() {
+	isGrid 		  = false;
+	isFlatEarth   = false;
+	isCurvedEarth = false;
+	resetEnvironment();
+}
+
+private void resetEnvironment() {
+	// Remove all
+	environment.getChildren().clear();
+	// Add Content 
+	if ( isGrid ) {
+		environment.getChildren().add(grid);	
+	} 
+	if ( isFlatEarth ) {
+		Ground ground = new Ground(GRID_SIZE);
+		environment.getChildren().add(ground.getGround());
+	}
+	if ( isCurvedEarth ) {
+		
+	}
 }
 
 

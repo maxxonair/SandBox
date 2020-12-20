@@ -122,7 +122,7 @@ public class Animation {
 		double fac =-7;
 		for(int ii=0;ii<60;ii++) {
 			Vec3 position = new Vec3(ii*ii*fac,ii*ii*fac,ii*fac);
-			Quaternion attitude = new Quaternion( 1 , ii*0.01 , 0 , 0 );
+			Quaternion attitude = new Quaternion( 1 , 0, 0, ii*0.01 );
 			//attitude.normalize();
 			sequenceList.add(new SequenceSet(ii,position, attitude));
 		}

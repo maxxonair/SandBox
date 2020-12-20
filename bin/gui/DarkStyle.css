@@ -16,3 +16,6 @@
 .split-pane {
 	-fx-background-color: #383838;
 }
+.radio-button {
+	-fx-text-fill: #e8e8e8;
+}

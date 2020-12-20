@@ -37,9 +37,35 @@ public class InlineModelViewer extends Application {
   private Image texture;
   private PhongMaterial texturedMaterial = new PhongMaterial();
 
-  TriangleMesh heightMap = createHeightMap(new Image(texturePath), 100, MESH_SIZE, 10);
-  //private MeshView meshView = loadMeshView();
-  private MeshView meshView = new MeshView(heightMap);
+  @Override
+  public void start(Stage stage) {
+    //texture = new Image(textureLoc);
+    texture = new Image(texturePath);
+    texturedMaterial.setDiffuseMap(texture);
+
+    boolean mode = true;
+    MeshView meshView = null;
+    if (mode) {
+    	 meshView = loadMeshView();
+    } else {
+         meshView = createHeightMapView();	
+    }
+    
+    Group group = buildScene(meshView);
+
+    RotateTransition rotate = rotate3dGroup(group);
+
+    VBox layout = new VBox(
+        createControls(rotate, meshView),
+        createScene3D(group)
+    );
+
+    stage.setTitle("Model Viewer");
+
+    Scene scene = new Scene(layout, Color.CORNSILK);
+    stage.setScene(scene);
+    stage.show();
+  }
 
 
   private MeshView loadMeshView() {
@@ -67,8 +93,13 @@ public class InlineModelViewer extends Application {
 
     return new MeshView(mesh);
   }
+  
+  private MeshView createHeightMapView() {
+	  TriangleMesh heightMap = createHeightMap(new Image(texturePath), 100, MESH_SIZE, 10);
+	  return new MeshView(heightMap);
+  }
 
-  private Group buildScene() {
+  private Group buildScene(MeshView meshView) {
     meshView.setTranslateX(VIEWPORT_SIZE / 2 + MODEL_X_OFFSET);
     meshView.setTranslateY(VIEWPORT_SIZE / 2 * 9.0 / 16 + MODEL_Y_OFFSET);
     meshView.setTranslateZ(VIEWPORT_SIZE / 2 + MODEL_Z_OFFSET);
@@ -79,27 +110,6 @@ public class InlineModelViewer extends Application {
     return new Group(meshView);
   }
 
-  @Override
-  public void start(Stage stage) {
-    texture = new Image(textureLoc);
-    texturedMaterial.setDiffuseMap(texture);
-
-    Group group = buildScene();
-
-    RotateTransition rotate = rotate3dGroup(group);
-
-    VBox layout = new VBox(
-        createControls(rotate),
-        createScene3D(group)
-    );
-
-    stage.setTitle("Model Viewer");
-
-    Scene scene = new Scene(layout, Color.CORNSILK);
-    stage.setScene(scene);
-    stage.show();
-  }
-
   private SubScene createScene3D(Group group) {
     SubScene scene3d = new SubScene(group, VIEWPORT_SIZE, VIEWPORT_SIZE * 9.0/16, true, SceneAntialiasing.BALANCED);
     scene3d.setFill(Color.rgb(10, 10, 40));
@@ -107,7 +117,7 @@ public class InlineModelViewer extends Application {
     return scene3d;
   }
 
-  private VBox createControls(RotateTransition rotateTransition) {
+  private VBox createControls(RotateTransition rotateTransition, MeshView meshView) {
     CheckBox cull      = new CheckBox("Cull Back");
     meshView.cullFaceProperty().bind(
         Bindings.when(
