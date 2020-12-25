@@ -7,6 +7,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
@@ -17,6 +18,7 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
@@ -50,15 +52,16 @@ double holdValy=0;
 private double sceneHeight;
 private double sceneWidth;
 
-private Scene parentScene;
 private SubScene scene;
 
 private AnchorPane anchorPane;
 
+private boolean isMaximized = false;
+
 //---------------------------------------------------------------------------
 // Environment settings 
 //---------------------------------------------------------------------------
-private float GRID_SIZE = 70000;
+private float gridSize = 70000;
 private float GRID_RESOLUTION = 500;
 
 private Group environment;
@@ -84,14 +87,14 @@ private   double anchorAngleCameraX=0;
 
 private   final DoubleProperty angleCameraY = new SimpleDoubleProperty(0);	
 private   final DoubleProperty angleCameraX = new SimpleDoubleProperty(0);
-private double cameraToTargetDistance = 0;
+private   double cameraToTargetDistance = 0;
 
 // Camera movement (Keyboard control)
 private boolean running, goNorth, goSouth, goEast, goWest;
 
 //private boolean isZoom = false;
 // Camera Field of View [deg]]:
-private double CAMERA_FOV = 40;
+private double DEFAULT_CAMERA_FOV = 40;
 // Third person camera activated:
 private boolean thirdPersonCamera = false; 
 // Default Positions:
@@ -122,6 +125,10 @@ private Label HUD_animationTime;
 //---------------------------------------------------------------------------
 // 
 //---------------------------------------------------------------------------
+@SuppressWarnings("exports")
+public WorldView(String objectFilePath, Scene scene) {
+	this.modelObjectPath = objectFilePath; 
+}
 	@Override
 	public void start(@SuppressWarnings("exports") Stage stage) throws Exception{
 		//---------------------------------------------------------------------------
@@ -147,7 +154,7 @@ private Label HUD_animationTime;
 	    camera = new PerspectiveCamera();
 		camera.setNearClip(.001);
 		camera.setFarClip(100);	
-		camera.setFieldOfView(CAMERA_FOV);
+		camera.setFieldOfView(DEFAULT_CAMERA_FOV);
 		
 		SmartGroup cameraGroup = new SmartGroup();
 		cameraGroup.getChildren().add(camera);
@@ -162,7 +169,7 @@ private Label HUD_animationTime;
 		//---------------------------------------------------------------------------
 		// Environment
 		//---------------------------------------------------------------------------
-		grid = Grid.createGrid(GRID_SIZE, GRID_RESOLUTION);
+		grid = Grid.createGrid(gridSize, GRID_RESOLUTION);
 		
 	    environment = new Group();
 	    resetEnvironment();
@@ -180,14 +187,14 @@ private Label HUD_animationTime;
 		sceneWidth = 1300;
 	    scene = new SubScene(root, sceneHeight, sceneWidth, true, SceneAntialiasing.BALANCED);
 		scene.setFill(Colors.backGroundColor);
-		scene.setCamera(camera);		
+		scene.setCamera(camera);	
 		
 		//---------------------------------------------------------------------------
 		// Mouse and Keyboard Control
 		//---------------------------------------------------------------------------
 		//initMouseControl(scene, camera);
 		
-		parentScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
                 switch (event.getCode()) {
@@ -202,7 +209,7 @@ private Label HUD_animationTime;
             }
         });
 
-		parentScene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
                 switch (event.getCode()) {
@@ -261,6 +268,30 @@ private Label HUD_animationTime;
         
 		anchorPane.getChildren().add(HUD_Elements);
 		
+		Button maximizeWindow = new Button("X");
+		//anchorPane.setPrefWidth(stage.getWidth()*0.9);
+		//anchorPane.setMinWidth(10);
+		maximizeWindow.setLayoutX( anchorPane.getWidth() - 15);
+		anchorPane.getChildren().add(maximizeWindow);
+		
+		maximizeWindow.setOnAction(new EventHandler<ActionEvent>() {
+		    @Override public void handle(ActionEvent e) {
+		    	System.out.println(anchorPane.getWidth());
+		    	if ( isMaximized ) {
+		    		minimize(stage);
+		    		scene.setWidth(anchorPane.getWidth());
+		    		scene.setHeight(anchorPane.getHeight());
+		    	} else {
+		    		maximize(stage);
+		    		scene.setWidth(anchorPane.getWidth());
+		    		scene.setWidth(anchorPane.getWidth());
+		    		scene.setHeight(anchorPane.getHeight());
+		    	}
+		    }
+		});
+		anchorPane.maxWidthProperty().addListener( e -> {
+			maximizeWindow.setLayoutX( anchorPane.getWidth() - 15);
+		});
        //---------------------------------------------------------------------------
        // Final setup
        //---------------------------------------------------------------------------
@@ -497,12 +528,6 @@ public void setModelObjectPath(String modelObjectPath) {
 	this.modelObjectPath = modelObjectPath;
 }
 
-@SuppressWarnings("exports")
-public WorldView(String objectFilePath, Scene scene) {
-	this.modelObjectPath = objectFilePath; 
-	this.parentScene = scene;
-}
-
 public double getSceneHeight() {
 	return sceneHeight;
 }
@@ -510,7 +535,7 @@ public double getSceneHeight() {
 public void setSceneHeight(double sceneHeight) {
 	this.sceneHeight = sceneHeight;
     scene.setHeight(sceneHeight);
-    //moveCameraTo(0,0);
+    anchorPane.setPrefHeight(sceneHeight);
 }
 
 public double getSceneWidth() {
@@ -526,7 +551,7 @@ public AnchorPane getAnchorPane() {
 public void setSceneWidth(double sceneWidth) {
 	this.sceneWidth = sceneWidth;
     scene.setWidth(sceneWidth);
-    //moveCameraTo(0,0);
+    anchorPane.setPrefWidth(sceneWidth);
 }	
 
 @SuppressWarnings("exports")
@@ -574,6 +599,10 @@ public boolean isThirdPersonCamera() {
 
 private Vec3 getModelAttitude() {
 	return ModelAttitude.getRollPitchYaw();
+}
+
+public void setCameraFoV(double FoV) {
+	camera.setFieldOfView(FoV);
 }
 
 @SuppressWarnings("exports")
@@ -630,15 +659,31 @@ public void selectNoGround() {
 	resetEnvironment();
 }
 
+
+
+public void setGridSize(float gridSize) {
+	this.gridSize = gridSize;
+	try {
+		resetEnvironment();
+	} catch (Exception exp ) {
+		
+	}
+}
+
+public float getGridSize() {
+	return gridSize;
+}
+
 private void resetEnvironment() {
 	// Remove all
 	environment.getChildren().clear();
 	// Add Content 
 	if ( isGrid ) {
+		grid = Grid.createGrid(gridSize, GRID_RESOLUTION);
 		environment.getChildren().add(grid);	
 	} 
 	if ( isFlatEarth ) {
-		Ground ground = new Ground(GRID_SIZE);
+		Ground ground = new Ground(gridSize);
 		environment.getChildren().add(ground.getGround());
 	}
 	if ( isCurvedEarth ) {
@@ -646,5 +691,18 @@ private void resetEnvironment() {
 	}
 }
 
+private void maximize(Stage stage) {
+	setSceneWidth(stage.getWidth());
+	setSceneHeight(stage.getHeight());
+	isMaximized=true;
+}
+
+private void minimize(Stage stage) {
+	double newSceneWidth  = stage.getWidth() - 200;	
+	setSceneWidth(newSceneWidth);
+    double newSceneHeight = stage.getHeight() * 0.99;
+    setSceneHeight(newSceneHeight);
+	isMaximized=false;
+}
 
 }

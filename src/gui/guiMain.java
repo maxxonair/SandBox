@@ -11,14 +11,11 @@ import worldWindow.WorldView;
 public class GuiMain extends Application {
 
 	private static Stage window;
-	private String windowTitle = "SandBox Environment Mark1";
+	private String windowTitle = "SandBox Environment Mark1";	
 	
-	//private String objectFilePath = "";
+	private double DEFAULT_HORIZONTAL_DEVIDER_POSITION = 0.17;
 	
-  public static void main(String[] args) {
-		// Start GUI
-	    launch(args);
-	    }
+  public static void main(String[] args) { launch(args); }
   
   public void start(@SuppressWarnings("exports") Stage primaryStage) {
 		window = primaryStage;
@@ -43,6 +40,7 @@ public class GuiMain extends Application {
 	    VBox centerLayout = new VBox(2);
 	    // Add 3D window
 	    centerLayout.getChildren().add(worldView.getAnchorPane());
+	    worldView.getAnchorPane().setPrefWidth(1285);
 	    // Add lower bar 
 	    Pane consoleBar = new Pane();
 	    centerLayout.getChildren().add(consoleBar);
@@ -51,7 +49,7 @@ public class GuiMain extends Application {
 	    
 	    // Add Sidebar
 	    ControlPanel controlPanel = new ControlPanel(worldView);
-	    
+	    controlPanel.getControlPanel().setPrefWidth(120);
 	    horizontalLayout.getItems().add(controlPanel.getControlPanel());
 	    horizontalLayout.getItems().add(centerLayout);
 	    
@@ -60,18 +58,17 @@ public class GuiMain extends Application {
 	    	worldView.setSceneWidth(newSceneWidth);
 	    });
 	    
-	    
-	    //VBox verticalLayout = new VBox(2);
 	    verticalLayout.getChildren().add(menuBar.create());
 	    verticalLayout.getChildren().add(horizontalLayout);
 	    
 	    window.widthProperty().addListener((obs, oldVal, newVal) -> {
 	    	double newSceneWidth =window.getWidth() - controlPanel.getControlPanel().getWidth();	
 	    	worldView.setSceneWidth(newSceneWidth);
+			horizontalLayout.setDividerPositions(DEFAULT_HORIZONTAL_DEVIDER_POSITION);
 	   });
 
 	   window.heightProperty().addListener((obs, oldVal, newVal) -> {
-		   double newSceneHeight = window.getHeight() * 0.85;
+		   double newSceneHeight = window.getHeight() * 0.99;
 		   worldView.setSceneHeight(newSceneHeight);
 	   });				    
 	    // Set Scene
@@ -84,5 +81,9 @@ public class GuiMain extends Application {
 
 	    window.show();
 	    window.setMaximized(true);
+	    
+		worldView.getAnchorPane().setPrefWidth(window.getWidth()*0.9);
+		worldView.getAnchorPane().setMinWidth(10);
+		horizontalLayout.setDividerPositions(DEFAULT_HORIZONTAL_DEVIDER_POSITION);
   }
 }

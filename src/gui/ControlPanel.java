@@ -10,30 +10,19 @@ public class ControlPanel {
 	@SuppressWarnings("unused")
 	private WorldView worldView; 
 	
-	private double minWidth = 250;
+	// private double MINIMUM_WIDTH = 250;
+	private double DEFAULT_WIDTH = 250;
 	
 	public ControlPanel(WorldView worldView) {
 		
 	    controlPanel = new AnchorPane();
-	    controlPanel.setMinWidth(minWidth);
+	    //controlPanel.setMinWidth(MINIMUM_WIDTH);
+	    controlPanel.setPrefWidth(DEFAULT_WIDTH);
 	    
 	    VBox contentLayout = new VBox(3);
 	    
 	    this.worldView = worldView;
-	    /*
-	    Slider modelXSlider = new Slider();
-	    modelXSlider.setMin(-1000);
-	    modelXSlider.setMax(1000);
-	    modelXSlider.setValue(0);
-	    modelXSlider.setMajorTickUnit(250);
-	    modelXSlider.setMinorTickCount(50);
-	    modelXSlider.setShowTickMarks(true);
-	    modelXSlider.valueProperty().addListener(e -> {
-	    	worldView.moveModelTo(worldView.getModelPosition().x,
-	    						  modelXSlider.getValue(),  
-	    						  worldView.getModelPosition().z);	
-	    });
-	     */
+	    
 	    AnimationPanel animationPanel = new AnimationPanel(worldView);
 	    EnvironmentPanel environmentPanel = new EnvironmentPanel(worldView);
 	    
@@ -46,11 +35,6 @@ public class ControlPanel {
 	@SuppressWarnings("exports")
 	public AnchorPane getControlPanel() {
 		return controlPanel;
-	}
-
-	public void setMinWidth(double minWidth) {
-		this.minWidth = minWidth;
-	    controlPanel.setMinWidth(150);
 	}
 			
 }
