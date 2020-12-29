@@ -64,6 +64,18 @@ public class EnvironmentPanel {
 	    		worldView.setCameraFoV(cameraFoV.getValue());
 	    		cameraFoVLabel.setText("Camera Field of View: "+Formats.decform00.format(cameraFoV.getValue())+ " [deg]");
 	    });	 
+	    
+	    Label cameraSpeedLabel = new Label("Camera Control Speed:");
+	    Slider cameraSpeed = new Slider();
+	    cameraSpeed.setMin(5);
+	    cameraSpeed.setMax(150);
+	    cameraSpeed.setValue(worldView.getCameraControlIncrement());
+	    cameraSpeed.setMajorTickUnit(25);
+	    cameraSpeed.setShowTickMarks(true);
+	    cameraSpeed.valueProperty().addListener(e -> {
+	    		worldView.setCameraControlIncrement((int) cameraSpeed.getValue());
+	    		cameraSpeedLabel.setText("Camera Control Speed: "+Formats.decform00.format(cameraSpeed.getValue())+ " [clicks]");
+	    });	 
 		
 		gridView.selectedProperty().addListener(observable -> {
 	        if (gridView.isSelected()) {
@@ -94,10 +106,13 @@ public class EnvironmentPanel {
 		checkBoxes.getChildren().add(curvedEarth);
 		checkBoxes.getChildren().add(noGround);
 		
+		sliderBoxes.setLayoutY(20);
 		sliderBoxes.getChildren().add(environmentSizeLabel);
 		sliderBoxes.getChildren().add(environmentSize);
 		sliderBoxes.getChildren().add(cameraFoVLabel);
 		sliderBoxes.getChildren().add(cameraFoV);
+		sliderBoxes.getChildren().add(cameraSpeedLabel);
+		sliderBoxes.getChildren().add(cameraSpeed);
 		
 		content.setLayoutY(20);
 		

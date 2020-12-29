@@ -19,3 +19,9 @@
 .radio-button {
 	-fx-text-fill: #e8e8e8;
 }
+.button {
+	-fx-text-fill: #e8e8e8;
+	-fx-background-color: transparent;
+	-fx-border-color: #e8e8e8;
+    -fx-border-width: 1.5;
+}

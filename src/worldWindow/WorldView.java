@@ -7,7 +7,6 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
@@ -22,12 +21,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import utils.EmptyButton;
 import utils.Formats;
 import utils.Quaternion;
 import utils.Vec3;
@@ -56,7 +58,6 @@ private SubScene scene;
 
 private AnchorPane anchorPane;
 
-private boolean isMaximized = false;
 
 //---------------------------------------------------------------------------
 // Environment settings 
@@ -90,7 +91,7 @@ private   final DoubleProperty angleCameraX = new SimpleDoubleProperty(0);
 private   double cameraToTargetDistance = 0;
 
 // Camera movement (Keyboard control)
-private boolean running, goNorth, goSouth, goEast, goWest;
+private boolean running, goNorth, goSouth, goEast, goWest, goForward, goBackward;
 
 //private boolean isZoom = false;
 // Camera Field of View [deg]]:
@@ -100,6 +101,14 @@ private boolean thirdPersonCamera = false;
 // Default Positions:
 private Vec3 DEFAULT_CAMERA_POSITION = new Vec3(-6125,-21075,-25050);
 private Vec3 DEFAULT_RELATIVE_CAMERA_POSITION = new Vec3(-650,-650,-1000);
+
+private Button cameraMinusX ;
+private Button cameraPlusX ;
+private Button cameraMinusY ;
+private Button cameraPlusY ;
+private Button cameraMinusZ ;
+private Button cameraPlusZ ;
+private int cameraControlIncrement = 25;
 //---------------------------------------------------------------------------
 // Model control 
 //---------------------------------------------------------------------------
@@ -228,11 +237,13 @@ public WorldView(String objectFilePath, Scene scene) {
             @Override
             public void handle(long now) {
                 int dx = 0, dy = 0, dz = 0;
-                int pace = 25;
-                if (goNorth) dy -= pace;
-                if (goSouth) dy += pace;
-                if (goEast)  dx += pace;
-                if (goWest)  dx -= pace;
+
+                if (goNorth) dy -= cameraControlIncrement;
+                if (goSouth) dy += cameraControlIncrement;
+                if (goEast)  dx += cameraControlIncrement;
+                if (goWest)  dx -= cameraControlIncrement;
+                if (goForward) dz += cameraControlIncrement;
+                if (goBackward) dz -= cameraControlIncrement;
                 if (running) { dz = -dy ; dy = 0 ; }
                 
                 if (thirdPersonCamera) {
@@ -267,7 +278,7 @@ public WorldView(String objectFilePath, Scene scene) {
 	    HUD_Elements.getChildren().add(HUD_animationTime);
         
 		anchorPane.getChildren().add(HUD_Elements);
-		
+		/*
 		Button maximizeWindow = new Button("X");
 		//anchorPane.setPrefWidth(stage.getWidth()*0.9);
 		//anchorPane.setMinWidth(10);
@@ -292,12 +303,116 @@ public WorldView(String objectFilePath, Scene scene) {
 		anchorPane.maxWidthProperty().addListener( e -> {
 			maximizeWindow.setLayoutX( anchorPane.getWidth() - 15);
 		});
+		*/
        //---------------------------------------------------------------------------
-       // Final setup
+       // Camera control 
        //---------------------------------------------------------------------------
+		
+		 cameraMinusX = new Button("X-");
+		 cameraPlusX = new Button("X+");
+		
+		 cameraMinusY = new Button("Y-");
+		 cameraPlusY = new Button("Y+");
+		
+		 cameraMinusZ = new Button("Z-");
+		 cameraPlusZ = new Button("Z+");
+		 
+		 int stdWidth = 40;
+		 cameraMinusX.setMinSize(stdWidth, cameraMinusX.getHeight());
+		 cameraPlusX.setMinSize(stdWidth, cameraPlusX.getHeight());
+		 cameraMinusY.setMinSize(stdWidth, cameraMinusY.getHeight());
+		 cameraPlusY.setMinSize(stdWidth, cameraPlusY.getHeight());
+		 cameraMinusZ.setMinSize(stdWidth, cameraMinusZ.getHeight());
+		 cameraPlusZ.setMinSize(stdWidth, cameraPlusZ.getHeight());
+		 
+ 		String bstyle=String.format("-fx-background-color: transparent");
+ 		cameraMinusX.setStyle(bstyle);
+		
+		VBox cameraControlVertical1 = new VBox(4);
+		VBox cameraControlVertical2 = new VBox(4);
+		VBox cameraControlVertical3 = new VBox(5);
+		
+		HBox cameraControlHorizontal = new HBox(3);
+		
+		cameraControlVertical1.getChildren().add(new EmptyButton(stdWidth));
+		cameraControlVertical1.getChildren().add(new EmptyButton(stdWidth));
+		cameraControlVertical1.getChildren().add(cameraMinusX);
+		cameraControlVertical1.getChildren().add(new EmptyButton(stdWidth));
+		
+		cameraControlVertical2.getChildren().add(cameraMinusZ);
+		cameraControlVertical2.getChildren().add(cameraMinusY);
+		cameraControlVertical2.getChildren().add(cameraPlusY);
+		cameraControlVertical2.getChildren().add(cameraPlusZ);
+		
+		cameraControlVertical3.getChildren().add(new EmptyButton(stdWidth));
+		cameraControlVertical3.getChildren().add(new EmptyButton(stdWidth));
+		cameraControlVertical3.getChildren().add(cameraPlusX);
+		cameraControlVertical3.getChildren().add(new EmptyButton(stdWidth));
+		
+		cameraControlHorizontal.getChildren().add(cameraControlVertical1);
+		cameraControlHorizontal.getChildren().add(cameraControlVertical2);
+		cameraControlHorizontal.getChildren().add(cameraControlVertical3);
+		
+		cameraControlHorizontal.setLayoutY(650);
+		cameraControlHorizontal.setLayoutX(40);
+		
+		anchorPane.getChildren().add(cameraControlHorizontal);
+		
+		cameraMinusX.pressedProperty().addListener((observable, wasPressed, pressed) -> {
+	        System.out.println("changed");
+	        if (pressed) {
+	        	goWest = true;
+	        } else {
+	        	goWest = false;
+	        }
+	    });
+		
+		cameraPlusX.pressedProperty().addListener((observable, wasPressed, pressed) -> {
+	        System.out.println("changed");
+	        if (pressed) {
+	        	goEast = true;
+	        } else {
+	        	goEast = false;
+	        }
+	    });
+		
+		cameraMinusY.pressedProperty().addListener((observable, wasPressed, pressed) -> {
+	        System.out.println("changed");
+	        if (pressed) {
+	        	goNorth = true;
+	        } else {
+	        	goNorth = false;
+	        }
+	    });
+		
+		cameraPlusY.pressedProperty().addListener((observable, wasPressed, pressed) -> {
+	        System.out.println("changed");
+	        if (pressed) {
+	        	goSouth = true;
+	        } else {
+	        	goSouth = false;
+	        }
+	    });
+		
+		cameraMinusZ.pressedProperty().addListener((observable, wasPressed, pressed) -> {
+	        System.out.println("changed");
+	        if (pressed) {
+	        	goForward = true;
+	        } else {
+	        	goForward = false;
+	        }
+	    });
+		
+		cameraPlusZ.pressedProperty().addListener((observable, wasPressed, pressed) -> {
+	        System.out.println("changed");
+	        if (pressed) {
+	        	goBackward = true;
+	        } else {
+	        	goBackward = false;
+	        }
+	    });
 	}
-	
-	
+		
     @SuppressWarnings("unused")
 	private void moveCameraBy(int dx, int dy) {
        // if (dx == 0 && dy == 0) return;
@@ -573,11 +688,11 @@ public Vec3 getModelPosition() {
 }
 
 private void updateHUD() {
-	HUD_cameraPosition.setText("Camera position [x y z ]: ["+
+	HUD_cameraPosition.setText("Camera position (x y z) [m]: ["+
 				 Formats.decform01.format(camera.getTranslateX())+
 			"  "+Formats.decform01.format(camera.getTranslateY())+
 			"  "+Formats.decform01.format(camera.getTranslateZ())+"]");
-	HUD_modelPosition.setText("Model position [x y z ]: ["+
+	HUD_modelPosition.setText("Model position (x y z) [m]: ["+
 			Formats.decform01.format(model.getTranslateX())+"  "+
 			Formats.decform01.format(model.getTranslateY())+"  "+
 			Formats.decform01.format(model.getTranslateZ())+"]");
@@ -691,18 +806,23 @@ private void resetEnvironment() {
 	}
 }
 
-private void maximize(Stage stage) {
+public void maximize(@SuppressWarnings("exports") Stage stage) {
 	setSceneWidth(stage.getWidth());
 	setSceneHeight(stage.getHeight());
-	isMaximized=true;
 }
 
-private void minimize(Stage stage) {
+public void minimize(@SuppressWarnings("exports") Stage stage) {
 	double newSceneWidth  = stage.getWidth() - 200;	
 	setSceneWidth(newSceneWidth);
     double newSceneHeight = stage.getHeight() * 0.99;
     setSceneHeight(newSceneHeight);
-	isMaximized=false;
+}
+public int getCameraControlIncrement() {
+	return cameraControlIncrement;
+}
+
+public void setCameraControlIncrement(int cameraControlIncrement) {
+	this.cameraControlIncrement = cameraControlIncrement;
 }
 
 }

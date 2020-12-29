@@ -32,6 +32,8 @@ public class AnimationPanel {
 		this.worldView=worldView;
 		contentPanel = new AnchorPane();
 		
+		Label unitLabel = new Label("Animation:");
+		
 		Button start = new Button("start");
 		Button pause = new Button("pause");
 		Button stop = new Button("stop");
@@ -80,10 +82,16 @@ public class AnimationPanel {
 		    	if ( worldView.isThirdPersonCamera() ) {
 		    		worldView.setThirdPersonCamera(false);
 		    		worldView.setCameraToAbsoluteDefaultPosition();
+
+		    		String bstyle=String.format("-fx-text-fill: #000000");
+		    		thirdPersonView.setStyle(bstyle);
 		    	} else {
 		    		worldView.setThirdPersonCamera(true);
 		    		worldView.setCameraToRelativeDefaultPostion();
-		    	}
+		    		
+		    		String bstyle=String.format("-fx-text-fill: #2a7db0");
+		    		thirdPersonView.setStyle(bstyle);
+		    	}		    	
 		    }
 		});
 		
@@ -111,7 +119,7 @@ public class AnimationPanel {
 		    	
 		    });
 		
-		
+		animationPanel.getChildren().add(unitLabel);
 		animationPanel.getChildren().add(buttons);
 		animationPanel.getChildren().add(statisticsPanel);
 		
