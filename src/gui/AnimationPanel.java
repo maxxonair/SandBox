@@ -8,7 +8,9 @@ import interfaces.LoadFromFile;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -44,6 +46,34 @@ public class AnimationPanel {
 		Label durationLabel = new Label("");
 		Label frequencyLabel = new Label("");
 		
+		Label trajectorySizeLabel = new Label("Set Trajectory Size: "+worldView.getTrajectoryRadius()+" [clicks]");
+		
+	    Slider trajectorySize = new Slider();
+	    trajectorySize.setMin(1);
+	    trajectorySize.setMax(100);
+	    trajectorySize.setValue(worldView.getTrajectoryRadius());
+	    trajectorySize.setMajorTickUnit(5);
+	    trajectorySize.setShowTickMarks(true);
+	    trajectorySize.valueProperty().addListener(e -> {
+	    		worldView.deleteTrajectory();
+	    		worldView.setTrajectoryRadius((int) trajectorySize.getValue());
+	    		worldView.createTrajectory();
+	    		
+	    		trajectorySizeLabel.setText("Set Trajectory Size: "+worldView.getTrajectoryRadius()+" [clicks]");
+	    });	
+	    
+	    CheckBox showTrajectory = new CheckBox();
+	    showTrajectory.setSelected(true);
+	    showTrajectory.setText("Show Trajectory");
+	    showTrajectory.selectedProperty().addListener(
+    	      e -> {
+    	         if ( showTrajectory.isSelected() ) {
+    	        	worldView.deleteTrajectory();
+    	        	worldView.createTrajectory();
+    	         } else {
+    	        	 worldView.deleteTrajectory();
+    	         }
+    	      });
 		
 		VBox statisticsPanel = new VBox(2);
 		statisticsPanel.getChildren().add(loadedFileLabel);
@@ -103,6 +133,8 @@ public class AnimationPanel {
                 	try {
 	                	AnimationFile animationFile = fileLoader.loadCsvData(file, 0.1) ;
 	                	
+	                	worldView.setAnimationFile(animationFile);
+	                	
 	                	animation.setAnimationFile(animationFile);
 	                	// Update indicator label
 	                	String[] pathElements = file.getPath().split(FILE_DELIMITER);
@@ -114,6 +146,7 @@ public class AnimationPanel {
                 		System.out.println(exp);
                 		System.out.println("Loading file failed");
                 	}
+                	
                 }
 		    }
 		    	
@@ -122,6 +155,9 @@ public class AnimationPanel {
 		animationPanel.getChildren().add(unitLabel);
 		animationPanel.getChildren().add(buttons);
 		animationPanel.getChildren().add(statisticsPanel);
+		animationPanel.getChildren().add(trajectorySizeLabel);
+		animationPanel.getChildren().add(trajectorySize);
+		animationPanel.getChildren().add(showTrajectory);
 		
 		contentPanel.getChildren().add(animationPanel);
 	}

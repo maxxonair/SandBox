@@ -86,4 +86,6 @@ public class GuiMain extends Application {
 		worldView.getAnchorPane().setMinWidth(10);
 		horizontalLayout.setDividerPositions(DEFAULT_HORIZONTAL_DEVIDER_POSITION);
   }
+  
+  
 }

@@ -2,6 +2,7 @@ package worldWindow;
 
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 
+import animate.AnimationFile;
 import gui.Colors;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -26,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
@@ -115,8 +117,6 @@ private int cameraControlIncrement = 25;
 private SmartGroup model;
 private String modelObjectPath;
 private double modelScale=3;
-
-//private Vector3 rotState = new Vector3(0,0,0);
  
 private Quaternion quatTemp = new Quaternion(1,0,0,0);
 
@@ -134,6 +134,10 @@ private Label HUD_animationTime;
 //---------------------------------------------------------------------------
 // 
 //---------------------------------------------------------------------------
+private Group trajectory;
+private int trajectoryRadius;
+private AnimationFile animationFile;
+
 @SuppressWarnings("exports")
 public WorldView(String objectFilePath, Scene scene) {
 	this.modelObjectPath = objectFilePath; 
@@ -411,6 +415,9 @@ public WorldView(String objectFilePath, Scene scene) {
 	        	goBackward = false;
 	        }
 	    });
+		trajectoryRadius = 15;
+		trajectory = new Group();
+		environment.getChildren().add(trajectory);
 	}
 		
     @SuppressWarnings("unused")
@@ -823,6 +830,37 @@ public int getCameraControlIncrement() {
 
 public void setCameraControlIncrement(int cameraControlIncrement) {
 	this.cameraControlIncrement = cameraControlIncrement;
+}
+
+public void createTrajectory() {
+	try {
+		for (int i=0;i<animationFile.getSequenceLength();i++) {
+			Sphere sphere = new Sphere(trajectoryRadius);
+			sphere.setTranslateX(animationFile.getSequence().get(i).position.x);
+			sphere.setTranslateY(animationFile.getSequence().get(i).position.y);
+			sphere.setTranslateZ(animationFile.getSequence().get(i).position.z);
+			trajectory.getChildren().add(sphere);
+		}
+	} catch (NullPointerException exp ) {
+		
+	}
+}
+
+public void deleteTrajectory() {
+	trajectory.getChildren().clear();
+}
+
+public void setAnimationFile(AnimationFile animationFile) {
+	this.animationFile = animationFile;
+	deleteTrajectory();
+	createTrajectory();
+}
+public void setTrajectoryRadius(int trajectoryRadius) {
+	this.trajectoryRadius = trajectoryRadius;
+}
+
+public int getTrajectoryRadius() {
+	return trajectoryRadius;
 }
 
 }
