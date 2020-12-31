@@ -40,12 +40,13 @@ public class EnvironmentPanel {
 		noGround.setToggleGroup(group);
 		
 	    
-		Label environmentSizeLabel = new Label("Environment Size:");
+		Label environmentSizeLabel = new Label();
 		
 	    Slider environmentSize = new Slider();
 	    environmentSize.setMin(ENVIRONMENT_GRID_MIN);
 	    environmentSize.setMax(ENVIRONMENT_GRID_MAX);
 	    environmentSize.setValue(worldView.getGridSize());
+	    environmentSizeLabel.setText("Environment Size: "+Formats.decform00.format(environmentSize.getValue()));
 	    environmentSize.setMajorTickUnit(5000);
 	    environmentSize.setShowTickMarks(true);
 	    environmentSize.valueProperty().addListener(e -> {
@@ -53,11 +54,12 @@ public class EnvironmentPanel {
 	    		environmentSizeLabel.setText("Environment Size: "+Formats.decform00.format(environmentSize.getValue()));
 	    });	
 	    
-	    Label cameraFoVLabel = new Label("Camera Field of View:");
+	    Label cameraFoVLabel = new Label();
 	    Slider cameraFoV = new Slider();
 	    cameraFoV.setMin(20);
 	    cameraFoV.setMax(90);
 	    cameraFoV.setValue(worldView.getGridSize());
+	    cameraFoVLabel.setText("Camera Field of View: "+Formats.decform00.format(cameraFoV.getValue())+ " [deg]");
 	    cameraFoV.setMajorTickUnit(10);
 	    cameraFoV.setShowTickMarks(true);
 	    cameraFoV.valueProperty().addListener(e -> {
@@ -70,6 +72,7 @@ public class EnvironmentPanel {
 	    cameraSpeed.setMin(5);
 	    cameraSpeed.setMax(150);
 	    cameraSpeed.setValue(worldView.getCameraControlIncrement());
+	    cameraSpeedLabel.setText("Camera Control Speed: "+Formats.decform00.format(cameraSpeed.getValue())+ " [clicks]");
 	    cameraSpeed.setMajorTickUnit(25);
 	    cameraSpeed.setShowTickMarks(true);
 	    cameraSpeed.valueProperty().addListener(e -> {

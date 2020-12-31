@@ -38,13 +38,13 @@ public class AnimationPanel {
 		
 		Button start = new Button("start");
 		Button pause = new Button("pause");
-		Button stop = new Button("stop");
+		Button stop  = new Button("stop");
 		
 		Button thirdPersonView = new Button("TPV");
 		
 		Label loadedFileLabel = new Label("");
-		Label durationLabel = new Label("");
-		Label frequencyLabel = new Label("");
+		Label durationLabel   = new Label("");
+		Label frequencyLabel  = new Label("");
 		
 		Label trajectorySizeLabel = new Label("Set Trajectory Size: "+worldView.getTrajectoryRadius()+" [clicks]");
 		
@@ -72,6 +72,18 @@ public class AnimationPanel {
     	        	worldView.createTrajectory();
     	         } else {
     	        	 worldView.deleteTrajectory();
+    	         }
+    	      });
+	    
+	    CheckBox showHud = new CheckBox();
+	    showHud.setSelected(true);
+	    showHud.setText("Show HUD elements");
+	    showHud.selectedProperty().addListener(
+    	      e -> {
+    	         if ( showHud.isSelected() ) {
+    	        	worldView.showHudElements();
+    	         } else {
+    	        	worldView.hideHudElements();
     	         }
     	      });
 		
@@ -113,7 +125,7 @@ public class AnimationPanel {
 		    		worldView.setThirdPersonCamera(false);
 		    		worldView.setCameraToAbsoluteDefaultPosition();
 
-		    		String bstyle=String.format("-fx-text-fill: #000000");
+		    		String bstyle=String.format("-fx-text-fill: #e8e8e8");
 		    		thirdPersonView.setStyle(bstyle);
 		    	} else {
 		    		worldView.setThirdPersonCamera(true);
@@ -158,6 +170,7 @@ public class AnimationPanel {
 		animationPanel.getChildren().add(trajectorySizeLabel);
 		animationPanel.getChildren().add(trajectorySize);
 		animationPanel.getChildren().add(showTrajectory);
+		animationPanel.getChildren().add(showHud);
 		
 		contentPanel.getChildren().add(animationPanel);
 	}

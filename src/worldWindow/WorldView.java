@@ -111,6 +111,7 @@ private Button cameraPlusY ;
 private Button cameraMinusZ ;
 private Button cameraPlusZ ;
 private int cameraControlIncrement = 25;
+private HBox cameraControlGroup;
 //---------------------------------------------------------------------------
 // Model control 
 //---------------------------------------------------------------------------
@@ -131,6 +132,8 @@ private Label HUD_cameraPosition;
 private Label HUD_modelPosition;
 private Label HUD_modelAttitude;
 private Label HUD_animationTime;
+
+Group HUD_Elements;
 //---------------------------------------------------------------------------
 // 
 //---------------------------------------------------------------------------
@@ -275,39 +278,9 @@ public WorldView(String objectFilePath, Scene scene) {
 	    HUD_animationTime = new Label("Time [s]: 0");
 	    HUD_animationTime.setLayoutY(60);
 	    
-	    Group HUD_Elements = new Group();
-	    HUD_Elements.getChildren().add(HUD_cameraPosition);
-	    HUD_Elements.getChildren().add(HUD_modelPosition);
-	    HUD_Elements.getChildren().add(HUD_modelAttitude);
-	    HUD_Elements.getChildren().add(HUD_animationTime);
+	    HUD_Elements = new Group();
         
 		anchorPane.getChildren().add(HUD_Elements);
-		/*
-		Button maximizeWindow = new Button("X");
-		//anchorPane.setPrefWidth(stage.getWidth()*0.9);
-		//anchorPane.setMinWidth(10);
-		maximizeWindow.setLayoutX( anchorPane.getWidth() - 15);
-		anchorPane.getChildren().add(maximizeWindow);
-		
-		maximizeWindow.setOnAction(new EventHandler<ActionEvent>() {
-		    @Override public void handle(ActionEvent e) {
-		    	System.out.println(anchorPane.getWidth());
-		    	if ( isMaximized ) {
-		    		minimize(stage);
-		    		scene.setWidth(anchorPane.getWidth());
-		    		scene.setHeight(anchorPane.getHeight());
-		    	} else {
-		    		maximize(stage);
-		    		scene.setWidth(anchorPane.getWidth());
-		    		scene.setWidth(anchorPane.getWidth());
-		    		scene.setHeight(anchorPane.getHeight());
-		    	}
-		    }
-		});
-		anchorPane.maxWidthProperty().addListener( e -> {
-			maximizeWindow.setLayoutX( anchorPane.getWidth() - 15);
-		});
-		*/
        //---------------------------------------------------------------------------
        // Camera control 
        //---------------------------------------------------------------------------
@@ -336,7 +309,7 @@ public WorldView(String objectFilePath, Scene scene) {
 		VBox cameraControlVertical2 = new VBox(4);
 		VBox cameraControlVertical3 = new VBox(5);
 		
-		HBox cameraControlHorizontal = new HBox(3);
+		cameraControlGroup = new HBox(3);
 		
 		cameraControlVertical1.getChildren().add(new EmptyButton(stdWidth));
 		cameraControlVertical1.getChildren().add(new EmptyButton(stdWidth));
@@ -353,17 +326,15 @@ public WorldView(String objectFilePath, Scene scene) {
 		cameraControlVertical3.getChildren().add(cameraPlusX);
 		cameraControlVertical3.getChildren().add(new EmptyButton(stdWidth));
 		
-		cameraControlHorizontal.getChildren().add(cameraControlVertical1);
-		cameraControlHorizontal.getChildren().add(cameraControlVertical2);
-		cameraControlHorizontal.getChildren().add(cameraControlVertical3);
+		cameraControlGroup.getChildren().add(cameraControlVertical1);
+		cameraControlGroup.getChildren().add(cameraControlVertical2);
+		cameraControlGroup.getChildren().add(cameraControlVertical3);
 		
-		cameraControlHorizontal.setLayoutY(650);
-		cameraControlHorizontal.setLayoutX(40);
+		cameraControlGroup.setLayoutY(650);
+		cameraControlGroup.setLayoutX(40);
 		
-		anchorPane.getChildren().add(cameraControlHorizontal);
 		
 		cameraMinusX.pressedProperty().addListener((observable, wasPressed, pressed) -> {
-	        System.out.println("changed");
 	        if (pressed) {
 	        	goWest = true;
 	        } else {
@@ -372,7 +343,6 @@ public WorldView(String objectFilePath, Scene scene) {
 	    });
 		
 		cameraPlusX.pressedProperty().addListener((observable, wasPressed, pressed) -> {
-	        System.out.println("changed");
 	        if (pressed) {
 	        	goEast = true;
 	        } else {
@@ -381,7 +351,6 @@ public WorldView(String objectFilePath, Scene scene) {
 	    });
 		
 		cameraMinusY.pressedProperty().addListener((observable, wasPressed, pressed) -> {
-	        System.out.println("changed");
 	        if (pressed) {
 	        	goNorth = true;
 	        } else {
@@ -390,7 +359,6 @@ public WorldView(String objectFilePath, Scene scene) {
 	    });
 		
 		cameraPlusY.pressedProperty().addListener((observable, wasPressed, pressed) -> {
-	        System.out.println("changed");
 	        if (pressed) {
 	        	goSouth = true;
 	        } else {
@@ -399,7 +367,6 @@ public WorldView(String objectFilePath, Scene scene) {
 	    });
 		
 		cameraMinusZ.pressedProperty().addListener((observable, wasPressed, pressed) -> {
-	        System.out.println("changed");
 	        if (pressed) {
 	        	goForward = true;
 	        } else {
@@ -408,16 +375,19 @@ public WorldView(String objectFilePath, Scene scene) {
 	    });
 		
 		cameraPlusZ.pressedProperty().addListener((observable, wasPressed, pressed) -> {
-	        System.out.println("changed");
 	        if (pressed) {
 	        	goBackward = true;
 	        } else {
 	        	goBackward = false;
 	        }
 	    });
+		
+		
 		trajectoryRadius = 15;
 		trajectory = new Group();
 		environment.getChildren().add(trajectory);
+		
+	    addHudElements();
 	}
 		
     @SuppressWarnings("unused")
@@ -861,6 +831,31 @@ public void setTrajectoryRadius(int trajectoryRadius) {
 
 public int getTrajectoryRadius() {
 	return trajectoryRadius;
+}
+
+public void addHudElements() {
+	try {
+	    HUD_Elements.getChildren().add(HUD_cameraPosition);
+	    HUD_Elements.getChildren().add(HUD_modelPosition);
+	    HUD_Elements.getChildren().add(HUD_modelAttitude);
+	    HUD_Elements.getChildren().add(HUD_animationTime);
+	    
+	    HUD_Elements.getChildren().add(cameraControlGroup);
+	} catch ( IllegalArgumentException exp ) {
+		
+	}
+}
+
+public void showHudElements() {
+	anchorPane.getChildren().add(HUD_Elements);
+}
+
+public void hideHudElements() {
+	anchorPane.getChildren().remove(HUD_Elements);
+}
+
+public void deleteHudElements() {
+		HUD_Elements.getChildren().clear();
 }
 
 }
