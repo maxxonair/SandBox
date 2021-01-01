@@ -152,10 +152,9 @@ public WorldView(String objectFilePath, Scene scene) {
 		//---------------------------------------------------------------------------
 		// Model 
 		//---------------------------------------------------------------------------
-		addModel();
 		
 	    rootGroup = new Group();
-		rootGroup.getChildren().add(model);
+		addModel();
 		
 		anchorPane = new AnchorPane();
 		//---------------------------------------------------------------------------
@@ -888,6 +887,7 @@ public void addModel() {
 	model.setTranslateX(200);
 	model.setTranslateY(0);
 	model.setTranslateZ(-300);
+	rootGroup.getChildren().add(model);
 }
 
 public Animation getAnimation() {
