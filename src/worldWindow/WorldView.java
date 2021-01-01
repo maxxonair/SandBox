@@ -112,6 +112,7 @@ private Button cameraMinusZ ;
 private Button cameraPlusZ ;
 private int cameraControlIncrement = 25;
 private HBox cameraControlGroup;
+private Vec3 cameraPosition;
 //---------------------------------------------------------------------------
 // Model control 
 //---------------------------------------------------------------------------
@@ -133,7 +134,7 @@ private Label HUD_modelPosition;
 private Label HUD_modelAttitude;
 private Label HUD_animationTime;
 
-Group HUD_Elements;
+private Group HUD_Elements;
 //---------------------------------------------------------------------------
 // 
 //---------------------------------------------------------------------------
@@ -182,6 +183,11 @@ public WorldView(String objectFilePath, Scene scene) {
 		camera.setTranslateX(DEFAULT_CAMERA_POSITION.x);
 		camera.setTranslateY(DEFAULT_CAMERA_POSITION.y);
 		camera.setTranslateZ(DEFAULT_CAMERA_POSITION.z);
+		
+		cameraPosition = new Vec3();
+		cameraPosition.x = DEFAULT_CAMERA_POSITION.x ;
+		cameraPosition.y = DEFAULT_CAMERA_POSITION.y ;
+		cameraPosition.z = DEFAULT_CAMERA_POSITION.z ;
 		//---------------------------------------------------------------------------
 		// Environment
 		//---------------------------------------------------------------------------
@@ -428,6 +434,9 @@ public WorldView(String objectFilePath, Scene scene) {
         camera.setTranslateX(x);
         camera.setTranslateY(y);
         camera.setTranslateZ(z);
+        cameraPosition.x = x;
+        cameraPosition.y = y;
+        cameraPosition.z = z;
         updateHUD();
     }
     
@@ -716,6 +725,13 @@ public void setCameraToAbsoluteDefaultPosition() {
 	updateHUD();
 }
 
+public void setCameraToLastAbsolutePosition() {
+	camera.setTranslateX(cameraPosition.x);
+	camera.setTranslateY(cameraPosition.y);
+	camera.setTranslateZ(cameraPosition.z);
+	updateHUD();
+}
+
 public void setCameraToRelativeDefaultPostion() {
     camera.setTranslateX(getModelPosition().x+DEFAULT_RELATIVE_CAMERA_POSITION.x);
     camera.setTranslateY(getModelPosition().y+DEFAULT_RELATIVE_CAMERA_POSITION.y);
@@ -856,6 +872,10 @@ public void hideHudElements() {
 
 public void deleteHudElements() {
 		HUD_Elements.getChildren().clear();
+}
+
+public double getCamerFoV() {
+	return camera.getFieldOfView();
 }
 
 }

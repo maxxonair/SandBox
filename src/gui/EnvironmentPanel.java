@@ -58,7 +58,7 @@ public class EnvironmentPanel {
 	    Slider cameraFoV = new Slider();
 	    cameraFoV.setMin(20);
 	    cameraFoV.setMax(90);
-	    cameraFoV.setValue(worldView.getGridSize());
+	    cameraFoV.setValue(worldView.getCamerFoV());
 	    cameraFoVLabel.setText("Camera Field of View: "+Formats.decform00.format(cameraFoV.getValue())+ " [deg]");
 	    cameraFoV.setMajorTickUnit(10);
 	    cameraFoV.setShowTickMarks(true);

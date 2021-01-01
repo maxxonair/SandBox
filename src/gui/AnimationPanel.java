@@ -122,8 +122,9 @@ public class AnimationPanel {
 		thirdPersonView.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override public void handle(ActionEvent e) {
 		    	if ( worldView.isThirdPersonCamera() ) {
+		    		
 		    		worldView.setThirdPersonCamera(false);
-		    		worldView.setCameraToAbsoluteDefaultPosition();
+		    		worldView.setCameraToLastAbsolutePosition();
 
 		    		String bstyle=String.format("-fx-text-fill: #e8e8e8");
 		    		thirdPersonView.setStyle(bstyle);
