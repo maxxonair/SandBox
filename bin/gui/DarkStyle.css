@@ -1,5 +1,5 @@
 .root{
-    -fx-background-color: #383838;
+    -fx-background-color: #282828;
 }
 .menu-bar{
 	-fx-background-color: #282828 ;
@@ -14,7 +14,7 @@
 	-fx-text-fill: #e8e8e8;
 }
 .split-pane {
-	-fx-background-color: #383838;
+	-fx-background-color: linear-gradient(to top, #383838, #282828);
 }
 .radio-button {
 	-fx-text-fill: #e8e8e8;
@@ -27,4 +27,12 @@
 }
 .check-box {
 	-fx-text-fill: #e8e8e8;
+}
+.menu-item {
+	-fx-text-fill: #e8e8e8;
+	-fx-background-color: linear-gradient(to right, #383838, #282828);
+}
+.context-menu {
+	-fx-background-color: linear-gradient(to right, #383838, #282828);
+
 }

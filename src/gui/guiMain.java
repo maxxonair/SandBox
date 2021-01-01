@@ -58,6 +58,7 @@ public class GuiMain extends Application {
 	    	worldView.setSceneWidth(newSceneWidth);
 	    });
 	    
+	    TopMenuBar menuBar = new TopMenuBar(worldView, controlPanel.getAnimationPanel());
 	    verticalLayout.getChildren().add(menuBar.create());
 	    verticalLayout.getChildren().add(horizontalLayout);
 	    

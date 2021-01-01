@@ -1,10 +1,7 @@
 package gui;
 
-import java.io.File;
 
-import animate.Animation;
 import animate.AnimationFile;
-import interfaces.LoadFromFile;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -14,8 +11,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import utils.Formats;
 import worldWindow.WorldView;
 
@@ -24,10 +19,10 @@ public class AnimationPanel {
 	private AnchorPane contentPanel;
 	@SuppressWarnings("unused")
 	private WorldView worldView;
+	Label loadedFileLabel ;
+	Label durationLabel   ;
+	Label frequencyLabel  ;
 	
-	private LoadFromFile fileLoader = new LoadFromFile();
-	
-	private String FILE_DELIMITER = "/";
 	
 	public AnimationPanel(WorldView worldView) {
 		
@@ -40,11 +35,11 @@ public class AnimationPanel {
 		Button pause = new Button("pause");
 		Button stop  = new Button("stop");
 		
-		Button thirdPersonView = new Button("TPV");
+		Button thirdPersonView = new Button("Third Person View");
 		
-		Label loadedFileLabel = new Label("");
-		Label durationLabel   = new Label("");
-		Label frequencyLabel  = new Label("");
+		 loadedFileLabel = new Label("");
+		 durationLabel   = new Label("");
+		 frequencyLabel  = new Label("");
 		
 		Label trajectorySizeLabel = new Label("Set Trajectory Size: "+worldView.getTrajectoryRadius()+" [clicks]");
 		
@@ -93,8 +88,6 @@ public class AnimationPanel {
 		statisticsPanel.getChildren().add(frequencyLabel);
 		statisticsPanel.getChildren().add(thirdPersonView);
 		
-		final FileChooser fileChooser = new FileChooser();
-		Button openFile = new Button("Open");
 		
 		VBox animationPanel = new VBox(2);
 		
@@ -102,20 +95,16 @@ public class AnimationPanel {
 		buttons.getChildren().add(start);
 		buttons.getChildren().add(pause);
 		buttons.getChildren().add(stop);
-		buttons.getChildren().add(openFile);
-		
-		Animation animation = new Animation(worldView);
-		animation.setTestAnimationFile();
 		
 		start.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override public void handle(ActionEvent e) {
-		    	animation.start();
+		    	worldView.getAnimation().start();
 		    }
 		});
 		
 		stop.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override public void handle(ActionEvent e) {
-		    	animation.stop();
+		    	worldView.getAnimation().stop();
 		    }
 		});
 		
@@ -138,32 +127,6 @@ public class AnimationPanel {
 		    }
 		});
 		
-		openFile.setOnAction(new EventHandler<ActionEvent>() {
-		    @Override public void handle(ActionEvent e) {
-		    	Stage stage = new Stage();
-                File file = fileChooser.showOpenDialog(stage);
-                if (file != null) {
-                	try {
-	                	AnimationFile animationFile = fileLoader.loadCsvData(file, 0.1) ;
-	                	
-	                	worldView.setAnimationFile(animationFile);
-	                	
-	                	animation.setAnimationFile(animationFile);
-	                	// Update indicator label
-	                	String[] pathElements = file.getPath().split(FILE_DELIMITER);
-	                	loadedFileLabel.setText("Loaded Animation File:  "+pathElements[pathElements.length-1]);
-	                	durationLabel.setText("Duration:  "+Formats.decform01.format(animationFile.getMaxTime())+" [s]");
-	                	frequencyLabel.setText("Source Frequency:  "+Formats.decform01.format(animationFile.getFrequency())+" [Hz]");
-	                	
-                	} catch (Exception exp ) {
-                		System.out.println(exp);
-                		System.out.println("Loading file failed");
-                	}
-                	
-                }
-		    }
-		    	
-		    });
 		
 		animationPanel.getChildren().add(unitLabel);
 		animationPanel.getChildren().add(buttons);
@@ -179,6 +142,12 @@ public class AnimationPanel {
 	@SuppressWarnings("exports")
 	public AnchorPane getContentPanel() {
 		return contentPanel;
+	}
+	
+	public void updateAnimationInfo(AnimationFile animationFile, String loadedFile ) {
+    	loadedFileLabel.setText("Loaded Animation File:  "+loadedFile);
+    	durationLabel.setText("Duration:  "+Formats.decform01.format(animationFile.getMaxTime())+" [s]");
+    	frequencyLabel.setText("Source Frequency:  "+Formats.decform01.format(animationFile.getFrequency())+" [Hz]");
 	}
 	
 	

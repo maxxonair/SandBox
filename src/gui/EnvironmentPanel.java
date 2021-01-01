@@ -78,7 +78,20 @@ public class EnvironmentPanel {
 	    cameraSpeed.valueProperty().addListener(e -> {
 	    		worldView.setCameraControlIncrement((int) cameraSpeed.getValue());
 	    		cameraSpeedLabel.setText("Camera Control Speed: "+Formats.decform00.format(cameraSpeed.getValue())+ " [clicks]");
-	    });	 
+	    });	
+	    
+	    Label modelScaleLabel = new Label();
+	    Slider modelScale = new Slider();
+	    modelScale.setMin(1);
+	    modelScale.setMax(150);
+	    modelScale.setValue(worldView.getModelScale());
+	    modelScaleLabel.setText("Model Scale: "+Formats.decform00.format(modelScale.getValue())+ " [clicks]");
+	    modelScale.setMajorTickUnit(25);
+	    modelScale.setShowTickMarks(true);
+	    modelScale.valueProperty().addListener(e -> {
+	    	worldView.setModelScale(modelScale.getValue());
+	    	modelScaleLabel.setText("Model Scale: "+Formats.decform00.format(modelScale.getValue())+ " [clicks]");
+	    });	
 		
 		gridView.selectedProperty().addListener(observable -> {
 	        if (gridView.isSelected()) {
@@ -116,6 +129,8 @@ public class EnvironmentPanel {
 		sliderBoxes.getChildren().add(cameraFoV);
 		sliderBoxes.getChildren().add(cameraSpeedLabel);
 		sliderBoxes.getChildren().add(cameraSpeed);
+		sliderBoxes.getChildren().add(modelScaleLabel);
+		sliderBoxes.getChildren().add(modelScale);
 		
 		content.setLayoutY(20);
 		

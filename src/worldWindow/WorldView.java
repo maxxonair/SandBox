@@ -2,6 +2,7 @@ package worldWindow;
 
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 
+import animate.Animation;
 import animate.AnimationFile;
 import gui.Colors;
 import javafx.animation.AnimationTimer;
@@ -59,8 +60,7 @@ private double sceneWidth;
 private SubScene scene;
 
 private AnchorPane anchorPane;
-
-
+private Animation animation ;
 //---------------------------------------------------------------------------
 // Environment settings 
 //---------------------------------------------------------------------------
@@ -69,6 +69,7 @@ private float GRID_RESOLUTION = 500;
 
 private Group environment;
 private Group grid;
+private Group rootGroup;
 // Is grid view active 
 private boolean isGrid = true;
 // Is flat, textured ground active 
@@ -96,7 +97,7 @@ private   double cameraToTargetDistance = 0;
 private boolean running, goNorth, goSouth, goEast, goWest, goForward, goBackward;
 
 //private boolean isZoom = false;
-// Camera Field of View [deg]]:
+// Camera Field of View [deg]:
 private double DEFAULT_CAMERA_FOV = 40;
 // Third person camera activated:
 private boolean thirdPersonCamera = false; 
@@ -151,18 +152,10 @@ public WorldView(String objectFilePath, Scene scene) {
 		//---------------------------------------------------------------------------
 		// Model 
 		//---------------------------------------------------------------------------
-		try {
-			model =  loadModel(modelObjectPath);
-		} catch (Exception e) {
-			model = new SmartGroup();
-		}
-		// Set init model position
-		model.setTranslateX(200);
-		model.setTranslateY(0);
-		model.setTranslateZ(-300);
+		addModel();
 		
-	    Group root = new Group();
-		root.getChildren().add(model);
+	    rootGroup = new Group();
+		rootGroup.getChildren().add(model);
 		
 		anchorPane = new AnchorPane();
 		//---------------------------------------------------------------------------
@@ -199,15 +192,15 @@ public WorldView(String objectFilePath, Scene scene) {
 		double translateGrid = 0;
 		environment.setTranslateX(-translateGrid);
 		
-		root.getChildren().add(environment);
-		root.getChildren().add(camera);
+		rootGroup.getChildren().add(environment);
+		rootGroup.getChildren().add(camera);
 		
 		//---------------------------------------------------------------------------
 		// Scene
 		//---------------------------------------------------------------------------
 		sceneHeight = 700;
 		sceneWidth = 1300;
-	    scene = new SubScene(root, sceneHeight, sceneWidth, true, SceneAntialiasing.BALANCED);
+	    scene = new SubScene(rootGroup, sceneHeight, sceneWidth, true, SceneAntialiasing.BALANCED);
 		scene.setFill(Colors.backGroundColor);
 		scene.setCamera(camera);	
 		
@@ -392,6 +385,8 @@ public WorldView(String objectFilePath, Scene scene) {
 		trajectoryRadius = 15;
 		trajectory = new Group();
 		environment.getChildren().add(trajectory);
+		animation = new Animation(this);
+		animation.setTestAnimationFile();
 		
 	    addHudElements();
 	}
@@ -876,6 +871,42 @@ public void deleteHudElements() {
 
 public double getCamerFoV() {
 	return camera.getFieldOfView();
+}
+
+public void removeModel() {
+	rootGroup.getChildren().remove(model);
+}
+
+public void addModel() {
+	try {
+		model =  loadModel(modelObjectPath);
+	} catch (Exception e) {
+		model = new SmartGroup();
+		System.out.println(e.getMessage());
+	}
+	// Set init model position
+	model.setTranslateX(200);
+	model.setTranslateY(0);
+	model.setTranslateZ(-300);
+}
+
+public Animation getAnimation() {
+	return animation;
+}
+
+public void setAnimation(Animation animation) {
+	this.animation = animation;
+}
+
+public void setModelScale(double scaleFactor) {
+	model.setScaleX(modelScale);
+	model.setScaleY(modelScale);
+	model.setScaleZ(modelScale);
+	this.modelScale = scaleFactor;
+}
+
+public double getModelScale() {
+	return modelScale;
 }
 
 }

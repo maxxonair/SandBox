@@ -9,6 +9,8 @@ public class ControlPanel {
 	private AnchorPane controlPanel;
 	@SuppressWarnings("unused")
 	private WorldView worldView; 
+	AnimationPanel animationPanel ;
+	EnvironmentPanel environmentPanel;
 	
 	// private double MINIMUM_WIDTH = 250;
 	private double DEFAULT_WIDTH = 250;
@@ -23,8 +25,8 @@ public class ControlPanel {
 	    
 	    this.worldView = worldView;
 	    
-	    AnimationPanel animationPanel = new AnimationPanel(worldView);
-	    EnvironmentPanel environmentPanel = new EnvironmentPanel(worldView);
+	     animationPanel = new AnimationPanel(worldView);
+	     environmentPanel = new EnvironmentPanel(worldView);
 	    
 	    contentLayout.getChildren().add(animationPanel.getContentPanel());
 	    contentLayout.getChildren().add(environmentPanel.getContentPanel());
@@ -35,6 +37,14 @@ public class ControlPanel {
 	@SuppressWarnings("exports")
 	public AnchorPane getControlPanel() {
 		return controlPanel;
+	}
+
+	public AnimationPanel getAnimationPanel() {
+		return animationPanel;
+	}
+
+	public EnvironmentPanel getEnvironmentPanel() {
+		return environmentPanel;
 	}
 			
 }
