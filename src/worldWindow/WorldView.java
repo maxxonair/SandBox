@@ -141,6 +141,8 @@ private Group HUD_Elements;
 //---------------------------------------------------------------------------
 private Group trajectory;
 private int trajectoryRadius;
+private double trajectoryScaleFactor;
+private double DEFAULT_TRAJECTORY_SCALE_FACTOR = 0.1;
 private AnimationFile animationFile;
 
 @SuppressWarnings("exports")
@@ -152,7 +154,7 @@ public WorldView(String objectFilePath, Scene scene) {
 		//---------------------------------------------------------------------------
 		// Model 
 		//---------------------------------------------------------------------------
-		
+		trajectoryScaleFactor = DEFAULT_TRAJECTORY_SCALE_FACTOR;
 	    rootGroup = new Group();
 		addModel();
 		
@@ -908,5 +910,21 @@ public void setModelScale(double scaleFactor) {
 public double getModelScale() {
 	return modelScale;
 }
+public double getTrajectoryScaleFactor() {
+	return trajectoryScaleFactor;
+}
+public void setTrajectoryScaleFactor(double trajectoryScaleFactor) {
+	double scaleCorrect = trajectoryScaleFactor / this.trajectoryScaleFactor;
+	for(int i=0;i<animation.getAnimationFile().getSequenceLength();i++) {		
+		animation.getAnimationFile().getSequence().get(i).position.x = scaleCorrect * animation.getAnimationFile().getSequence().get(i).position.x;
+		animation.getAnimationFile().getSequence().get(i).position.y = scaleCorrect * animation.getAnimationFile().getSequence().get(i).position.y;
+		animation.getAnimationFile().getSequence().get(i).position.z = scaleCorrect * animation.getAnimationFile().getSequence().get(i).position.z;
+	}
+	this.trajectoryScaleFactor = trajectoryScaleFactor;
+	deleteTrajectory();
+	createTrajectory();
+}
+
+
 
 }

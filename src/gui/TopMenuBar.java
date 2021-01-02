@@ -94,7 +94,7 @@ public class TopMenuBar {
                 File file = animationFileChooser.showOpenDialog(stage);
                 if (file != null) {
                 	try {
-	                	AnimationFile animationFile = fileLoader.loadCsvData(file, 0.1) ;
+	                	AnimationFile animationFile = fileLoader.loadCsvData(file, worldView.getTrajectoryScaleFactor()) ;
 	                	worldView.setAnimationFile(animationFile);
 	                	worldView.getAnimation().setAnimationFile(animationFile);
 	                	// Update indicator label

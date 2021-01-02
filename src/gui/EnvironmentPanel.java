@@ -92,6 +92,19 @@ public class EnvironmentPanel {
 	    	worldView.setModelScale(modelScale.getValue());
 	    	modelScaleLabel.setText("Model Scale: "+Formats.decform00.format(modelScale.getValue())+ " [clicks]");
 	    });	
+	    
+	    Label trajectoryScaleLabel = new Label();
+	    Slider trajectoryScale = new Slider();
+	    trajectoryScale.setMin(0.001);
+	    trajectoryScale.setMax(5);
+	    trajectoryScale.setValue(worldView.getTrajectoryScaleFactor());
+	    trajectoryScaleLabel.setText("Trajectory Scale: "+Formats.decform00.format(trajectoryScale.getValue())+ " [clicks]");
+	    trajectoryScale.setMajorTickUnit(0.1);
+	    trajectoryScale.setShowTickMarks(true);
+	    trajectoryScale.valueProperty().addListener(e -> {
+	    	worldView.setTrajectoryScaleFactor(trajectoryScale.getValue());
+	    	trajectoryScaleLabel.setText("Trajectory Scale: "+Formats.decform00.format(trajectoryScale.getValue())+ " [clicks]");
+	    });	
 		
 		gridView.selectedProperty().addListener(observable -> {
 	        if (gridView.isSelected()) {
@@ -131,6 +144,8 @@ public class EnvironmentPanel {
 		sliderBoxes.getChildren().add(cameraSpeed);
 		sliderBoxes.getChildren().add(modelScaleLabel);
 		sliderBoxes.getChildren().add(modelScale);
+		sliderBoxes.getChildren().add(trajectoryScaleLabel);
+		sliderBoxes.getChildren().add(trajectoryScale);
 		
 		content.setLayoutY(20);
 		
