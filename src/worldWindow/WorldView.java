@@ -4,7 +4,6 @@ import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 
 import animate.Animation;
 import animate.AnimationFile;
-import gui.Colors;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
@@ -76,6 +75,7 @@ private boolean isGrid = true;
 private boolean isFlatEarth = false;
 // Is height map + textured ground active 
 private boolean isCurvedEarth = false;
+private Vec3 environmentBackgroundColor = new Vec3(0.15,0.15,0.15);
 //---------------------------------------------------------------------------
 // Mouse control  
 //---------------------------------------------------------------------------
@@ -114,6 +114,8 @@ private Button cameraPlusZ ;
 private int cameraControlIncrement = 25;
 private HBox cameraControlGroup;
 private Vec3 cameraPosition;
+private double cameraNearClip=.001;
+private double cameraFarClip = 1000;
 //---------------------------------------------------------------------------
 // Model control 
 //---------------------------------------------------------------------------
@@ -163,8 +165,8 @@ public WorldView(String objectFilePath, Scene scene) {
 		// Camera
 		//---------------------------------------------------------------------------
 	    camera = new PerspectiveCamera();
-		camera.setNearClip(.001);
-		camera.setFarClip(100);	
+		camera.setNearClip(cameraNearClip);
+		camera.setFarClip(cameraFarClip);	
 		camera.setFieldOfView(DEFAULT_CAMERA_FOV);
 		
 		SmartGroup cameraGroup = new SmartGroup();
@@ -202,7 +204,9 @@ public WorldView(String objectFilePath, Scene scene) {
 		sceneHeight = 700;
 		sceneWidth = 1300;
 	    scene = new SubScene(rootGroup, sceneHeight, sceneWidth, true, SceneAntialiasing.BALANCED);
-		scene.setFill(Colors.backGroundColor);
+		scene.setFill(Color.color(environmentBackgroundColor.x,
+								  environmentBackgroundColor.y,
+								  environmentBackgroundColor.z));
 		scene.setCamera(camera);	
 		
 		//---------------------------------------------------------------------------
@@ -924,7 +928,32 @@ public void setTrajectoryScaleFactor(double trajectoryScaleFactor) {
 	deleteTrajectory();
 	createTrajectory();
 }
+public double getCameraNearClip() {
+	return cameraNearClip;
+}
+public void setCameraNearClip(double cameraNearClip) {
+	camera.setNearClip(cameraNearClip);
+	this.cameraNearClip = cameraNearClip;
+}
+public double getCameraFarClip() {
+	return cameraFarClip;
+}
+public void setCameraFarClip(double cameraFarClip) {
+	camera.setFarClip(cameraFarClip);
+	this.cameraFarClip = cameraFarClip;
+}
 
+public void setEnvironmentBackgroundColor(double r, double g, double b) {
+	scene.setFill(Color.color(r,g,b));
+	environmentBackgroundColor.x = r;
+	environmentBackgroundColor.y = g;
+	environmentBackgroundColor.z = b;
+}
+
+@SuppressWarnings("exports")
+public Vec3 getEnvironmentBackgroundColor() {
+	return environmentBackgroundColor;
+}
 
 
 }

@@ -14,7 +14,7 @@ public class EnvironmentPanel {
 	private AnchorPane contentPanel;
 	
 	private double ENVIRONMENT_GRID_MIN = 1000;
-	private double ENVIRONMENT_GRID_MAX = 100000;
+	private double ENVIRONMENT_GRID_MAX = 150000;
 	
 	public EnvironmentPanel(WorldView worldView) {
 		
@@ -54,31 +54,6 @@ public class EnvironmentPanel {
 	    		environmentSizeLabel.setText("Environment Size: "+Formats.decform00.format(environmentSize.getValue()));
 	    });	
 	    
-	    Label cameraFoVLabel = new Label();
-	    Slider cameraFoV = new Slider();
-	    cameraFoV.setMin(20);
-	    cameraFoV.setMax(90);
-	    cameraFoV.setValue(worldView.getCamerFoV());
-	    cameraFoVLabel.setText("Camera Field of View: "+Formats.decform00.format(cameraFoV.getValue())+ " [deg]");
-	    cameraFoV.setMajorTickUnit(10);
-	    cameraFoV.setShowTickMarks(true);
-	    cameraFoV.valueProperty().addListener(e -> {
-	    		worldView.setCameraFoV(cameraFoV.getValue());
-	    		cameraFoVLabel.setText("Camera Field of View: "+Formats.decform00.format(cameraFoV.getValue())+ " [deg]");
-	    });	 
-	    
-	    Label cameraSpeedLabel = new Label("Camera Control Speed:");
-	    Slider cameraSpeed = new Slider();
-	    cameraSpeed.setMin(5);
-	    cameraSpeed.setMax(150);
-	    cameraSpeed.setValue(worldView.getCameraControlIncrement());
-	    cameraSpeedLabel.setText("Camera Control Speed: "+Formats.decform00.format(cameraSpeed.getValue())+ " [clicks]");
-	    cameraSpeed.setMajorTickUnit(25);
-	    cameraSpeed.setShowTickMarks(true);
-	    cameraSpeed.valueProperty().addListener(e -> {
-	    		worldView.setCameraControlIncrement((int) cameraSpeed.getValue());
-	    		cameraSpeedLabel.setText("Camera Control Speed: "+Formats.decform00.format(cameraSpeed.getValue())+ " [clicks]");
-	    });	
 	    
 	    Label modelScaleLabel = new Label();
 	    Slider modelScale = new Slider();
@@ -98,12 +73,25 @@ public class EnvironmentPanel {
 	    trajectoryScale.setMin(0.001);
 	    trajectoryScale.setMax(5);
 	    trajectoryScale.setValue(worldView.getTrajectoryScaleFactor());
-	    trajectoryScaleLabel.setText("Trajectory Scale: "+Formats.decform00.format(trajectoryScale.getValue())+ " [clicks]");
+	    trajectoryScaleLabel.setText("Trajectory Scale: "+Formats.decform03.format(trajectoryScale.getValue())+ " [clicks]");
 	    trajectoryScale.setMajorTickUnit(0.1);
 	    trajectoryScale.setShowTickMarks(true);
 	    trajectoryScale.valueProperty().addListener(e -> {
 	    	worldView.setTrajectoryScaleFactor(trajectoryScale.getValue());
-	    	trajectoryScaleLabel.setText("Trajectory Scale: "+Formats.decform00.format(trajectoryScale.getValue())+ " [clicks]");
+	    	trajectoryScaleLabel.setText("Trajectory Scale: "+Formats.decform03.format(trajectoryScale.getValue())+ " [clicks]");
+	    });	
+	    
+	    Label environmentBrightnessLabel = new Label();
+	    Slider environmentBrightness = new Slider();
+	    environmentBrightness.setMin(0.0);
+	    environmentBrightness.setMax(1);
+	    environmentBrightness.setValue(worldView.getEnvironmentBackgroundColor().x);
+	    environmentBrightnessLabel.setText("Environment Brightness: "+Formats.decform00.format(100 * environmentBrightness.getValue())+ " [percent]");
+	    environmentBrightness.setMajorTickUnit(0.1);
+	    environmentBrightness.setShowTickMarks(true);
+	    environmentBrightness.valueProperty().addListener(e -> {
+	    	worldView.setEnvironmentBackgroundColor(environmentBrightness.getValue(),environmentBrightness.getValue(),environmentBrightness.getValue());
+	    	environmentBrightnessLabel.setText("Environment Brightness: "+Formats.decform00.format(100 * environmentBrightness.getValue())+ " [percent]");
 	    });	
 		
 		gridView.selectedProperty().addListener(observable -> {
@@ -138,14 +126,12 @@ public class EnvironmentPanel {
 		sliderBoxes.setLayoutY(20);
 		sliderBoxes.getChildren().add(environmentSizeLabel);
 		sliderBoxes.getChildren().add(environmentSize);
-		sliderBoxes.getChildren().add(cameraFoVLabel);
-		sliderBoxes.getChildren().add(cameraFoV);
-		sliderBoxes.getChildren().add(cameraSpeedLabel);
-		sliderBoxes.getChildren().add(cameraSpeed);
 		sliderBoxes.getChildren().add(modelScaleLabel);
 		sliderBoxes.getChildren().add(modelScale);
 		sliderBoxes.getChildren().add(trajectoryScaleLabel);
 		sliderBoxes.getChildren().add(trajectoryScale);
+		sliderBoxes.getChildren().add(environmentBrightnessLabel);
+		sliderBoxes.getChildren().add(environmentBrightness);
 		
 		content.setLayoutY(20);
 		

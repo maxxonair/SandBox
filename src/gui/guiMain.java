@@ -49,12 +49,11 @@ public class GuiMain extends Application {
 	    
 	    // Add Sidebar
 	    ControlPanel controlPanel = new ControlPanel(worldView);
-	    controlPanel.getControlPanel().setPrefWidth(120);
-	    horizontalLayout.getItems().add(controlPanel.getControlPanel());
+	    horizontalLayout.getItems().add(controlPanel.getContentPane());
 	    horizontalLayout.getItems().add(centerLayout);
 	    
-	    controlPanel.getControlPanel().widthProperty().addListener(e -> {
-	    	double newSceneWidth =window.getWidth() - controlPanel.getControlPanel().getWidth();	
+	    controlPanel.getContentPane().widthProperty().addListener(e -> {
+	    	double newSceneWidth =window.getWidth() - controlPanel.getContentPane().getWidth();	
 	    	worldView.setSceneWidth(newSceneWidth);
 	    });
 	    
@@ -63,7 +62,7 @@ public class GuiMain extends Application {
 	    verticalLayout.getChildren().add(horizontalLayout);
 	    
 	    window.widthProperty().addListener((obs, oldVal, newVal) -> {
-	    	double newSceneWidth =window.getWidth() - controlPanel.getControlPanel().getWidth();	
+	    	double newSceneWidth =window.getWidth() - controlPanel.getContentPane().getWidth();	
 	    	worldView.setSceneWidth(newSceneWidth);
 			horizontalLayout.setDividerPositions(DEFAULT_HORIZONTAL_DEVIDER_POSITION);
 	   });
