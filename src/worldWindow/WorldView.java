@@ -94,7 +94,7 @@ private   final DoubleProperty angleCameraX = new SimpleDoubleProperty(0);
 private   double cameraToTargetDistance = 0;
 
 // Camera movement (Keyboard control)
-private boolean running, goNorth, goSouth, goEast, goWest, goForward, goBackward;
+private boolean  goNorth, goSouth, goEast, goWest, goForward, goBackward;
 
 //private boolean isZoom = false;
 // Camera Field of View [deg]:
@@ -229,7 +229,6 @@ public WorldView(String objectFilePath, Scene scene) {
                     case DOWN:  goSouth = true; break;
                     case LEFT:  goWest  = true; break;
                     case RIGHT: goEast  = true; break;
-                    case SHIFT: running = true; break;
 				default:
 					break;
                 }
@@ -244,7 +243,6 @@ public WorldView(String objectFilePath, Scene scene) {
                     case DOWN:  goSouth = false; break;
                     case LEFT:  goWest  = false; break;
                     case RIGHT: goEast  = false; break;
-                    case SHIFT: running = false; break;
 				default:
 					break;
                 }
@@ -262,7 +260,7 @@ public WorldView(String objectFilePath, Scene scene) {
                 if (goWest)  dx    -= cameraControlIncrement;
                 if (goForward) dz  += cameraControlIncrement;
                 if (goBackward) dz -= cameraControlIncrement;
-                if (running) { dz = -dy ; dy = 0 ; }
+                //if (running) { dz = -dy ; dy = 0 ; }
                 
                 if (thirdPersonCamera) {
                 	cameraRelativePosition.x += dx;
@@ -422,7 +420,6 @@ public WorldView(String objectFilePath, Scene scene) {
 	}
 	@SuppressWarnings("unused")
 	private void moveCameraBy(int dx, int dy) {
-       // if (dx == 0 && dy == 0) return;
 
         final double cx = camera.getBoundsInLocal().getWidth()  / 2;
         final double cy = camera.getBoundsInLocal().getHeight() / 2;
@@ -434,10 +431,6 @@ public WorldView(String objectFilePath, Scene scene) {
     }
     
     private void moveCameraBy(int dx, int dy, int dz) {
-        // if (dx == 0 && dy == 0) return;
-
-        // final double cx = camera.getBoundsInLocal().getWidth()  / 2;
-        // final double cy = camera.getBoundsInLocal().getHeight() / 2;
 
          double x =  camera.getTranslateX() + dx;
          double y =  camera.getTranslateY() + dy;
@@ -459,9 +452,9 @@ public WorldView(String objectFilePath, Scene scene) {
         camera.setTranslateY(y);
         camera.setTranslateZ(z);
         if (thirdPersonCamera) {
-        	cameraRelativePosition.x = x;
-        	cameraRelativePosition.y = y;
-        	cameraRelativePosition.z = z;
+        	cameraRelativePosition.x = x - model.getTranslateX() ;
+        	cameraRelativePosition.y = y - model.getTranslateY() ;
+        	cameraRelativePosition.z = z - model.getTranslateZ() ;
         } else {
         	cameraAbsolutePosition.x = x;
         	cameraAbsolutePosition.y = y;
@@ -476,9 +469,9 @@ public WorldView(String objectFilePath, Scene scene) {
         model.setTranslateZ(z);
         updateHUD();
         if (thirdPersonCamera) {
-            camera.setTranslateX(x+DEFAULT_RELATIVE_CAMERA_POSITION.x);
-            camera.setTranslateY(y+DEFAULT_RELATIVE_CAMERA_POSITION.y);
-            camera.setTranslateZ(z+DEFAULT_RELATIVE_CAMERA_POSITION.z);
+            camera.setTranslateX(x+cameraRelativePosition.x);
+            camera.setTranslateY(y+cameraRelativePosition.y);
+            camera.setTranslateZ(z+cameraRelativePosition.z);
         } else {
     		camera.setTranslateX(DEFAULT_CAMERA_POSITION.x);
     		camera.setTranslateY(DEFAULT_CAMERA_POSITION.y);
@@ -487,7 +480,7 @@ public WorldView(String objectFilePath, Scene scene) {
     }
 	
 	@SuppressWarnings("exports")
-	public void roateModelTo(Quaternion q) {
+	public void rotateModelTo(Quaternion q) {
 			Quaternion qInverse=new Quaternion();
 			qInverse.w = quatTemp.w;
 			qInverse.x = quatTemp.x;
@@ -763,9 +756,9 @@ public void setCameraToLastAbsolutePosition() {
 }
 
 public void setCameraToLastRelativePosition() {
-	camera.setTranslateX(cameraRelativePosition.x);
-	camera.setTranslateY(cameraRelativePosition.y);
-	camera.setTranslateZ(cameraRelativePosition.z);
+	camera.setTranslateX(model.getTranslateX() + cameraRelativePosition.x);
+	camera.setTranslateY(model.getTranslateY() + cameraRelativePosition.y);
+	camera.setTranslateZ(model.getTranslateZ() + cameraRelativePosition.z);
 	updateHUD();
 }
 
@@ -986,8 +979,7 @@ public void setTrajectoryScaleFactor(double trajectoryScaleFactor) {
 		animation.getAnimationFile().getSequence().get(i).position.z = scaleCorrect * animation.getAnimationFile().getSequence().get(i).position.z;
 	}
 	this.trajectoryScaleFactor = trajectoryScaleFactor;
-	deleteTrajectory();
-	createTrajectory();
+	setShowTrajectory(showTrajectory);
 }
 public double getCameraNearClip() {
 	return cameraNearClip;

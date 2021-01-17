@@ -63,7 +63,7 @@ public class Animation {
 	            	// Update model position
 	            	worldView.moveModelTo(set.position.x, set.position.y, set.position.z);
 	            	// Update model attitude
-	            	worldView.roateModelTo(set.attitude);
+	            	worldView.rotateModelTo(set.attitude);
 	            	// Update model HUD info
 	            	worldView.setAnimationTime(animationTime);
 	            	worldView.updateModelAttitude(set.attitude);

@@ -125,8 +125,7 @@ public class LoadFromFile {
 			double dt = animationFile.getSequence().get(1).time - animationFile.getSequence().get(0).time;
 			animationFile.setFrequency(1/dt);
 		}
-		for(int i=0;i<sequenceList.size();i++) {
-			
+		for(int i=0;i<sequenceList.size();i++) {			
 			Vec3 position = sequenceList.get(i).position;
 			sequenceList.get(i).position.x = (position.x - referencePosition.x) * factor;
 			sequenceList.get(i).position.y = (position.y - referencePosition.y) * factor;
