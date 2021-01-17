@@ -113,7 +113,8 @@ private Button cameraMinusZ ;
 private Button cameraPlusZ ;
 private int cameraControlIncrement = 25;
 private HBox cameraControlGroup;
-private Vec3 cameraPosition;
+private Vec3 cameraRelativePosition;
+private Vec3 cameraAbsolutePosition;
 private double cameraNearClip=.001;
 private double cameraFarClip = 1000;
 //---------------------------------------------------------------------------
@@ -145,6 +146,7 @@ private Group trajectory;
 private int trajectoryRadius;
 private double trajectoryScaleFactor;
 private double DEFAULT_TRAJECTORY_SCALE_FACTOR = 0.1;
+private boolean showTrajectory;
 private AnimationFile animationFile;
 
 @SuppressWarnings("exports")
@@ -157,6 +159,7 @@ public WorldView(String objectFilePath, Scene scene) {
 		// Model 
 		//---------------------------------------------------------------------------
 		trajectoryScaleFactor = DEFAULT_TRAJECTORY_SCALE_FACTOR;
+		showTrajectory=true;
 	    rootGroup = new Group();
 		addModel();
 		
@@ -180,10 +183,14 @@ public WorldView(String objectFilePath, Scene scene) {
 		camera.setTranslateY(DEFAULT_CAMERA_POSITION.y);
 		camera.setTranslateZ(DEFAULT_CAMERA_POSITION.z);
 		
-		cameraPosition = new Vec3();
-		cameraPosition.x = DEFAULT_CAMERA_POSITION.x ;
-		cameraPosition.y = DEFAULT_CAMERA_POSITION.y ;
-		cameraPosition.z = DEFAULT_CAMERA_POSITION.z ;
+		cameraAbsolutePosition = new Vec3();
+		cameraRelativePosition = new Vec3();
+		cameraAbsolutePosition.x = DEFAULT_CAMERA_POSITION.x ;
+		cameraAbsolutePosition.y = DEFAULT_CAMERA_POSITION.y ;
+		cameraAbsolutePosition.z = DEFAULT_CAMERA_POSITION.z ;
+		cameraRelativePosition.x = DEFAULT_RELATIVE_CAMERA_POSITION.x ;
+		cameraRelativePosition.y = DEFAULT_RELATIVE_CAMERA_POSITION.y ;
+		cameraRelativePosition.z = DEFAULT_RELATIVE_CAMERA_POSITION.z ;
 		//---------------------------------------------------------------------------
 		// Environment
 		//---------------------------------------------------------------------------
@@ -249,19 +256,23 @@ public WorldView(String objectFilePath, Scene scene) {
             public void handle(long now) {
                 int dx = 0, dy = 0, dz = 0;
 
-                if (goNorth) dy -= cameraControlIncrement;
-                if (goSouth) dy += cameraControlIncrement;
-                if (goEast)  dx += cameraControlIncrement;
-                if (goWest)  dx -= cameraControlIncrement;
-                if (goForward) dz += cameraControlIncrement;
+                if (goNorth) dy    -= cameraControlIncrement;
+                if (goSouth) dy    += cameraControlIncrement;
+                if (goEast)  dx    += cameraControlIncrement;
+                if (goWest)  dx    -= cameraControlIncrement;
+                if (goForward) dz  += cameraControlIncrement;
                 if (goBackward) dz -= cameraControlIncrement;
                 if (running) { dz = -dy ; dy = 0 ; }
                 
                 if (thirdPersonCamera) {
-                	DEFAULT_RELATIVE_CAMERA_POSITION.x += dx;
-                	DEFAULT_RELATIVE_CAMERA_POSITION.y += dy;
-                	DEFAULT_RELATIVE_CAMERA_POSITION.z += dz;
+                	cameraRelativePosition.x += dx;
+                	cameraRelativePosition.y += dy;
+                	cameraRelativePosition.z += dz;
+                	moveCameraBy(dx, dy, dz);
                 } else {
+                	cameraAbsolutePosition.x += dx;
+                	cameraAbsolutePosition.y += dy;
+                	cameraAbsolutePosition.z += dz;
                 	moveCameraBy(dx, dy, dz);
                 }
             }
@@ -396,7 +407,20 @@ public WorldView(String objectFilePath, Scene scene) {
 	    addHudElements();
 	}
 		
-    @SuppressWarnings("unused")
+    public boolean isShowTrajectory() {
+		return showTrajectory;
+	}
+	public void setShowTrajectory(boolean showTrajectory) {
+		this.showTrajectory = showTrajectory;
+		if (showTrajectory) {
+			deleteTrajectory();
+			createTrajectory();
+			addTrajectory();
+		} else {
+			deleteTrajectory();
+		}
+	}
+	@SuppressWarnings("unused")
 	private void moveCameraBy(int dx, int dy) {
        // if (dx == 0 && dy == 0) return;
 
@@ -434,9 +458,15 @@ public WorldView(String objectFilePath, Scene scene) {
         camera.setTranslateX(x);
         camera.setTranslateY(y);
         camera.setTranslateZ(z);
-        cameraPosition.x = x;
-        cameraPosition.y = y;
-        cameraPosition.z = z;
+        if (thirdPersonCamera) {
+        	cameraRelativePosition.x = x;
+        	cameraRelativePosition.y = y;
+        	cameraRelativePosition.z = z;
+        } else {
+        	cameraAbsolutePosition.x = x;
+        	cameraAbsolutePosition.y = y;
+        	cameraAbsolutePosition.z = z;
+        }
         updateHUD();
     }
     
@@ -726,9 +756,16 @@ public void setCameraToAbsoluteDefaultPosition() {
 }
 
 public void setCameraToLastAbsolutePosition() {
-	camera.setTranslateX(cameraPosition.x);
-	camera.setTranslateY(cameraPosition.y);
-	camera.setTranslateZ(cameraPosition.z);
+	camera.setTranslateX(cameraAbsolutePosition.x);
+	camera.setTranslateY(cameraAbsolutePosition.y);
+	camera.setTranslateZ(cameraAbsolutePosition.z);
+	updateHUD();
+}
+
+public void setCameraToLastRelativePosition() {
+	camera.setTranslateX(cameraRelativePosition.x);
+	camera.setTranslateY(cameraRelativePosition.y);
+	camera.setTranslateZ(cameraRelativePosition.z);
 	updateHUD();
 }
 
@@ -797,6 +834,8 @@ private void resetEnvironment() {
 	if ( isCurvedEarth ) {
 		
 	}
+	// Put back trajectory 
+	setShowTrajectory(showTrajectory);
 }
 
 public void maximize(@SuppressWarnings("exports") Stage stage) {
@@ -832,14 +871,36 @@ public void createTrajectory() {
 	}
 }
 
+public void addTrajectory() {
+	try {
+		environment.getChildren().add(trajectory);
+	} catch (Exception exp) {
+		
+	}
+}
+
 public void deleteTrajectory() {
-	trajectory.getChildren().clear();
+	try {
+		environment.getChildren().remove(trajectory);
+	} catch (Exception exp1) {
+		
+	}
+	try {
+		trajectory.getChildren().clear();
+	} catch (Exception exp ) {
+		
+	}
 }
 
 public void setAnimationFile(AnimationFile animationFile) {
 	this.animationFile = animationFile;
-	deleteTrajectory();
-	createTrajectory();
+	if (showTrajectory) {
+		deleteTrajectory();
+		createTrajectory();
+		addTrajectory();
+	} else {
+		deleteTrajectory();
+	}
 }
 public void setTrajectoryRadius(int trajectoryRadius) {
 	this.trajectoryRadius = trajectoryRadius;

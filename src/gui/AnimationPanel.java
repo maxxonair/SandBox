@@ -44,29 +44,29 @@ public class AnimationPanel {
 		Label trajectorySizeLabel = new Label("Set Trajectory Size: "+worldView.getTrajectoryRadius()+" [clicks]");
 		
 	    Slider trajectorySize = new Slider();
+	    CheckBox showTrajectory = new CheckBox();
+	    showTrajectory.setSelected(true);
+	    
 	    trajectorySize.setMin(1);
 	    trajectorySize.setMax(100);
 	    trajectorySize.setValue(worldView.getTrajectoryRadius());
 	    trajectorySize.setMajorTickUnit(5);
 	    trajectorySize.setShowTickMarks(true);
 	    trajectorySize.valueProperty().addListener(e -> {
-	    		worldView.deleteTrajectory();
+
 	    		worldView.setTrajectoryRadius((int) trajectorySize.getValue());
-	    		worldView.createTrajectory();
+	    		worldView.setShowTrajectory(showTrajectory.isSelected());
 	    		
 	    		trajectorySizeLabel.setText("Set Trajectory Size: "+worldView.getTrajectoryRadius()+" [clicks]");
 	    });	
 	    
-	    CheckBox showTrajectory = new CheckBox();
-	    showTrajectory.setSelected(true);
 	    showTrajectory.setText("Show Trajectory");
 	    showTrajectory.selectedProperty().addListener(
     	      e -> {
     	         if ( showTrajectory.isSelected() ) {
-    	        	worldView.deleteTrajectory();
-    	        	worldView.createTrajectory();
+    	        	worldView.setShowTrajectory(true);  
     	         } else {
-    	        	 worldView.deleteTrajectory();
+    	        	 worldView.setShowTrajectory(false);
     	         }
     	      });
 	    
@@ -119,7 +119,7 @@ public class AnimationPanel {
 		    		thirdPersonView.setStyle(bstyle);
 		    	} else {
 		    		worldView.setThirdPersonCamera(true);
-		    		worldView.setCameraToRelativeDefaultPostion();
+		    		worldView.setCameraToLastRelativePosition();
 		    		
 		    		String bstyle=String.format("-fx-text-fill: #2a7db0");
 		    		thirdPersonView.setStyle(bstyle);
