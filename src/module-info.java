@@ -8,4 +8,5 @@ module Sandbox {
 	exports gui;
 	exports worldWindow;
 	exports animate;
+	exports attitudeWindow;
 }

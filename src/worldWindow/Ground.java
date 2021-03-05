@@ -19,7 +19,7 @@ public class Ground {
 	  private static final double MODEL_Y_OFFSET = 0;
 	  private static final double MODEL_Z_OFFSET = 0;
 	  
-	  private static final String texturePath = "file:" + System.getProperty("user.dir") + "/resources/MoonHM-LOLA-Tiles-16.png";
+	  private static final String texturePath = "file:" + System.getProperty("user.dir") + "/resources/marsSurface.jpg";
 	  
 	  private Image texture;
 	  private PhongMaterial texturedMaterial = new PhongMaterial();
